@@ -1,0 +1,6 @@
+#!/bin/bash
+export PATH=$PATH:/home/neil/Android/pgs4a-0.9.4/android-sdk/platform-tools:/home/neil/Android/pgs4a-0.9.4/android-sdk/tools
+
+adb push main.py /sdcard/kivy/vtes
+adb push vtesgame.kv /sdcard/kivy/vtes
+adb push android.txt /sdcard/kivy/vtes
