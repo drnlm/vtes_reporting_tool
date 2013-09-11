@@ -30,42 +30,52 @@ GameWidget:
         text: "Exit"
         on_release: app.stop()
 
-<GameReportWidget>:
+<GameReportManager>:
+
+<PlayerScreen>:
     game: game
-    players: players
-    Label:
-        font_size: 15
-        top: root.height
-        center_x: root.width // 2
-        text: "Game"
+    player: player
     BoxLayout:
-        id: players
-        orientation: 'vertical'
-        top: root.top - 60
-        height: 120
-        width: root.width
+        id: player
+        size: root.width, 50
+        size_hint: None, None
     GridLayout:
         id: game
         # We'll fill this in dynamically, so we keep references
         # to the text input fields easily
         cols: 4
         rows: 7
-        top: root.height - 200
-        width: root.width
+        size: root.width, 400
+        size_hint: None, None
         row_default_height: 40
         row_force_default: True
     Button:
-        top: self.height
-        right: 20 + self.width
-        text: "Next Turn"
-        on_release: root.next()
+        size: 120, 40
+        pos_hint: {'left': 0, 'top': 0.15}
+        size_hint: None, None
+        text: "Prev Player <--"
+        on_release: root.change(-1)
     Button:
-        top: self.height
-        right: 150 + self.width
+        size: 120, 40
+        pos_hint: {'right': 1, 'top': 0.15}
+        size_hint: None, None
+        text: "Next Player -->"
+        on_release: root.change(+1)
+    Button:
+        size: 120, 40
+        pos_hint: {'left': 0.1}
+        size_hint: None, None
+        text: "Next Turn"
+        on_release: root.next_turn()
+    Button:
+        size: 120, 40
+        pos_hint: {'right': 0.5}
+        size_hint: None, None
         text: "Oust Player"
         on_release: root.oust()
     Button:
-        top: self.height
-        right: root.right - 20
+        size: 120, 40
+        pos_hint: {'right': 0.9}
+        size_hint: None, None
         text: "Stop Game"
         on_release: root.stop_game()

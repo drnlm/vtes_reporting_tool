@@ -14,48 +14,86 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition
 
 
-class GameReportWidget(Widget):
+class PlayerScreen(Screen):
 
     game = ObjectProperty(None)
-    players = ObjectProperty(None)
+    player = ObjectProperty(None)
+
+    def __init__(self, oParent, name):
+        super(PlayerScreen, self).__init__(name=name)
+        self.oParent = oParent
+
+    def change(self, iDir):
+        self.oParent.change(iDir)
+        
+    def next_turn(self):
+        self.oParent.next_turn()
+
+    def oust(self):
+        self.oParent.oust()
+
+    def stop_game(self):
+        self.oParent.stop_game()
+
+
+class GameReportWidget(ScreenManager):
 
     def __init__(self, oParent):
         super(GameReportWidget, self).__init__()
         self.oParent = oParent
         self.iCur = 0
-        self.aPlayer = []
+        self.iScreen = 0
+        self.aPlayers = []
         self.dDecks = {}
         self.aLog = []
+        self.aScreens = []
 
     def set_players(self, aPlayers):
         self.aPlayers = aPlayers
 
     def set_decks(self, dDecks):
         self.dDecks = dDecks
-        y_size = 120 // len(self.aPlayers)
-        for oWidget in self.players.children[:]:
-            self.players.remove_widget(oWidget)
+
+    def add_screens(self):
+        for oWidget in self.children[:]:
+            self.remove_widget(oWidget)
+        self.aScreens = []
         for sPlayer in self.aPlayers:
             if sPlayer in self.dDecks:
-                label = Label(text='%s (%s) bleeding' % (
-                    sPlayer, self.dDecks[sPlayer]), size_hint_y=y_size)
+                sDeck = self.dDecks[sPlayer]
             else:
-                label = Label(text='%s bleeding' % sPlayer,
-                              size_hint_y=y_size)
-            self.players.add_widget(label)
+                sDeck = ''
+            oScreen = PlayerScreen(self, sPlayer)
+            self.aScreens.append(sPlayer)
+            self.add_widget(oScreen)
 
-    def next(self):
+    def change(self, iDir):
+        self.iScreen += iDir
+        if self.iScreen < 0:
+            self.iScreen = len(self.aScreens) - 1
+        elif self.iScreen >= len(self.aScreens):
+            self.iScreen = 0
+        if iDir < 0:
+            self.transition = SlideTransition(direction="right")
+        else:
+            self.transition = SlideTransition(direction="left")
+        self.current = self.aScreens[self.iScreen]
+
+    def next_turn(self):
         self.iCur += 1
         if self.iCur >= len(self.aPlayers):
             self.iCur = 0
+        self.change(+1)
 
     def oust(self):
         pass
 
     def stop_game(self):
         self.oParent.stop_game()
+
 
 
 class PlayerSelectWidget(Widget):
@@ -93,17 +131,20 @@ class GameWidget(BoxLayout):
     def __init__(self):
         super(GameWidget, self).__init__()
         self.select = PlayerSelectWidget(self)
-        self.game = GameReportWidget(self)
+        self.game = None
         self.add_widget(self.select)
 
     def start_game(self, aPlayers, dDecks):
+        self.game = GameReportWidget(self)
         self.remove_widget(self.select)
         self.game.set_players(aPlayers)
         self.game.set_decks(dDecks)
+        self.game.add_screens()
         self.add_widget(self.game)
 
     def stop_game(self):
         self.remove_widget(self.game)
+        self.game = None
         self.add_widget(self.select)
 
 
