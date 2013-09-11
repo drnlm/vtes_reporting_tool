@@ -22,9 +22,14 @@ class PlayerScreen(Screen):
     game = ObjectProperty(None)
     player = ObjectProperty(None)
 
-    def __init__(self, oParent, name):
+    def __init__(self, oParent, name, sPlayer, sDeck):
         super(PlayerScreen, self).__init__(name=name)
         self.oParent = oParent
+        if sDeck:
+            label = Label(text="%s (playing %s)" % (sPlayer, sDeck))
+        else:
+            label = Label(text="%s (unspecfied)" % sPlayer)
+        self.player.add_widget(label)
 
     def change(self, iDir):
         self.oParent.change(iDir)
@@ -66,7 +71,7 @@ class GameReportWidget(ScreenManager):
                 sDeck = self.dDecks[sPlayer]
             else:
                 sDeck = ''
-            oScreen = PlayerScreen(self, sPlayer)
+            oScreen = PlayerScreen(self, sPlayer, sPlayer, sDeck)
             self.aScreens.append(sPlayer)
             self.add_widget(oScreen)
 
