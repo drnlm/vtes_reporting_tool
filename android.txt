@@ -1,0 +1,4 @@
+title=VTES Game Reporting
+author=Neil Muller
+api=1
+orientation=portrait
