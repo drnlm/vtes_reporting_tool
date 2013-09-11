@@ -1,6 +1,8 @@
 #:kivy 1.7.0
+#
+GameWidget:
 
-<GameWidget>:
+<PlayerSelectWidget>:
     grid: grid
     Label:
         font_size: 15
@@ -19,7 +21,7 @@
         row_force_default: True
     Button:
         top: self.height
-        right: 20 + self.width 
+        right: 20 + self.width
         text: "Start Game"
         on_release: root.start()
     Button:
@@ -27,3 +29,43 @@
         right: root.right - 20
         text: "Exit"
         on_release: app.stop()
+
+<GameReportWidget>:
+    game: game
+    players: players
+    Label:
+        font_size: 15
+        top: root.height
+        center_x: root.width // 2
+        text: "Game"
+    BoxLayout:
+        id: players
+        orientation: 'vertical'
+        top: root.top - 60
+        height: 120
+        width: root.width
+    GridLayout:
+        id: game
+        # We'll fill this in dynamically, so we keep references
+        # to the text input fields easily
+        cols: 4
+        rows: 7
+        top: root.height - 200
+        width: root.width
+        row_default_height: 40
+        row_force_default: True
+    Button:
+        top: self.height
+        right: 20 + self.width
+        text: "Next Turn"
+        on_release: root.next()
+    Button:
+        top: self.height
+        right: 150 + self.width
+        text: "Oust Player"
+        on_release: root.oust()
+    Button:
+        top: self.height
+        right: root.right - 20
+        text: "Stop Game"
+        on_release: root.stop_game()
