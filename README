@@ -1,0 +1,22 @@
+A kivy-based app for helping keep track of VTES games.
+
+Basic UI is:
+
+   Setup game details
+      Player names, in bleed order
+        (Space for deck type notes)
+
+   advance turns
+      Each turn has space for notes
+         Useful shortcuts
+            - Play master
+            - Bring out minion (space for name)
+            - Minion X Bleeds
+            - Minion X calls a votes
+            - Minion X takes other action
+            - Minion Y blocks
+            - Combat
+            - Minion X goes to torpor
+
+   Note ousting:
+      - Will skip ousted players thereafter
