@@ -92,7 +92,9 @@ class GameReportWidget(Carousel):
         self.iCur += 1
         if self.iCur >= len(self.aPlayers):
             self.iCur = 0
-        self.change(+1)
+        # scoll to the current player
+        if self.aScreens[self.iCur] != self.current_slide:
+            self.index = self.iCur
 
     def oust(self):
         pass
