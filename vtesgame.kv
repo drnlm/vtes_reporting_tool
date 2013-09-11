@@ -1,0 +1,29 @@
+#:kivy 1.7.0
+
+<GameWidget>:
+    grid: grid
+    Label:
+        font_size: 15
+        top: root.height
+        center_x: root.width // 2
+        text: "Setup the game"
+    GridLayout:
+        id: grid
+        # We'll fill this in dynamically, so we keep references
+        # to the text input fields easily
+        cols: 4
+        rows: 7
+        top: root.height - 80
+        width: root.width
+        row_default_height: 40
+        row_force_default: True
+    Button:
+        top: self.height
+        right: 20 + self.width 
+        text: "Start Game"
+        on_release: root.start()
+    Button:
+        top: self.height
+        right: root.right - 20
+        text: "Exit"
+        on_release: app.stop()
