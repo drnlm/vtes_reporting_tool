@@ -14,16 +14,17 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.carousel import Carousel
 
 
-class PlayerScreen(Screen):
+class PlayerScreen(RelativeLayout):
 
     game = ObjectProperty(None)
     player = ObjectProperty(None)
 
-    def __init__(self, oParent, name, sPlayer, sDeck):
-        super(PlayerScreen, self).__init__(name=name)
+    def __init__(self, oParent, sPlayer, sDeck):
+        super(PlayerScreen, self).__init__()
         self.oParent = oParent
         if sDeck:
             label = Label(text="%s (playing %s)" % (sPlayer, sDeck))
@@ -44,7 +45,7 @@ class PlayerScreen(Screen):
         self.oParent.stop_game()
 
 
-class GameReportWidget(ScreenManager):
+class GameReportWidget(Carousel):
 
     def __init__(self, oParent):
         super(GameReportWidget, self).__init__()
@@ -55,6 +56,7 @@ class GameReportWidget(ScreenManager):
         self.dDecks = {}
         self.aLog = []
         self.aScreens = []
+        self.loop = True
 
     def set_players(self, aPlayers):
         self.aPlayers = aPlayers
@@ -71,7 +73,7 @@ class GameReportWidget(ScreenManager):
                 sDeck = self.dDecks[sPlayer]
             else:
                 sDeck = ''
-            oScreen = PlayerScreen(self, sPlayer, sPlayer, sDeck)
+            oScreen = PlayerScreen(self, sPlayer, sDeck)
             self.aScreens.append(sPlayer)
             self.add_widget(oScreen)
 
@@ -82,10 +84,9 @@ class GameReportWidget(ScreenManager):
         elif self.iScreen >= len(self.aScreens):
             self.iScreen = 0
         if iDir < 0:
-            self.transition = SlideTransition(direction="right")
+            self.load_previous()
         else:
-            self.transition = SlideTransition(direction="left")
-        self.current = self.aScreens[self.iScreen]
+            self.load_next()
 
     def next_turn(self):
         self.iCur += 1
