@@ -3,22 +3,19 @@
 GameWidget:
 
 <PlayerSelectWidget>:
-    grid: grid
+    input_area: input
     Label:
         font_size: 15
         top: root.height
         center_x: root.width // 2
         text: "Setup the game"
-    GridLayout:
-        id: grid
+    FloatLayout:
+        id: input
         # We'll fill this in dynamically, so we keep references
         # to the text input fields easily
-        cols: 4
-        rows: 7
-        top: root.height - 80
+        y: 80
+        height: root.height - 160
         width: root.width
-        row_default_height: 40
-        row_force_default: True
     Button:
         top: self.height
         right: 20 + self.width
@@ -40,16 +37,12 @@ GameWidget:
         size: root.width, 50
         size_hint: None, None
         pos_hint: {'top': 1}
-    GridLayout:
+    FloatLayout:
         id: game
         # We'll fill this in dynamically, so we keep references
         # to the text input fields easily
-        cols: 4
-        rows: 7
         size: root.width, 400
         size_hint: None, None
-        row_default_height: 40
-        row_force_default: True
     Button:
         size: 120, 40
         pos_hint: {'left': 0, 'top': 0.15}

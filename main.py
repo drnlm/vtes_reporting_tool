@@ -104,7 +104,7 @@ class GameReportWidget(Carousel):
 
 class PlayerSelectWidget(Widget):
 
-    grid = ObjectProperty(None)
+    input_area = ObjectProperty(None)
 
     def __init__(self, oParent):
         super(PlayerSelectWidget, self).__init__()
@@ -112,13 +112,23 @@ class PlayerSelectWidget(Widget):
         self._aNameWidgets = []
         self._aDeckWidgets = []
         for i in range(1, 8):
-            self.grid.add_widget(Label(text="Player %d : " % i))
-            oTextInput = TextInput(multiline=False)
-            self.grid.add_widget(oTextInput)
+            bot = 1 - 0.125*i
+            print bot
+            self.input_area.add_widget(Label(text="Player %d : " % i,
+                size_hint=(0.2, 0.1),
+                pos_hint={'right' : 0.2, 'center_y': bot }))
+            oTextInput = TextInput(multiline=False,
+                size_hint=(0.3, 0.075),
+                pos_hint={'right' : 0.5, 'center_y': bot })
+            self.input_area.add_widget(oTextInput)
             self._aNameWidgets.append(oTextInput)
-            self.grid.add_widget(Label(text=" playing Deck : "))
-            oTextInput = TextInput(multiline=False)
-            self.grid.add_widget(oTextInput)
+            self.input_area.add_widget(Label(text=" playing Deck : ",
+                size_hint=(0.2, 0.1),
+                pos_hint={'right' : 0.7, 'center_y': bot }))
+            oTextInput = TextInput(multiline=False,
+                size_hint=(0.3, 0.075),
+                pos_hint={'right' : 1, 'center_y': bot })
+            self.input_area.add_widget(oTextInput)
             self._aDeckWidgets.append(oTextInput)
 
     def start(self):
