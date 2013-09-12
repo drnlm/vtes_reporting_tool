@@ -73,6 +73,8 @@ class PlayerScreen(RelativeLayout):
                                    self._sPlayer),
                                font_size=20, markup=True)
         self.player.add_widget(label)
+        label = self._get_round_label()
+        self.player.add_widget(label)
 
     def unhighlight_player(self):
         for label in self.player.children[:]:
@@ -96,6 +98,13 @@ class PlayerScreen(RelativeLayout):
                                        sOusted),
                 font_size=15, markup=True)
         self.player.add_widget(label)
+        label = self._get_round_label()
+        self.player.add_widget(label)
+
+    def _get_round_label(self):
+        label = Label(text="[color=33ff33]Round %d.%d (%d players)[/color]"
+                      % self.oParent.get_round(), markup=True)
+        return label
 
 
 class GameReportWidget(Carousel):
@@ -108,6 +117,7 @@ class GameReportWidget(Carousel):
         self.aPlayers = []
         self.dDecks = {}
         self.aLog = []
+        self.iRound = 1
         self.aOusted = set()
         self.loop = True
 
@@ -151,6 +161,10 @@ class GameReportWidget(Carousel):
         self.iCur += 1
         if self.iCur >= len(self.aPlayers):
             self.iCur = 0
+            self.iRound += 1
+
+    def get_round(self):
+        return self.iRound, self.iCur + 1, len(self.aPlayers)
 
     def next_turn(self):
         self.step_current()
