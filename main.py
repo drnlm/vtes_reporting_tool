@@ -23,8 +23,23 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.popup import Popup
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.carousel import Carousel
+
+
+class MinionName(Popup):
+
+    name = ObjectProperty(None)
+
+    def __init__(self, oParent):
+        super(MinionName, self).__init__()
+        self._oParent = oParent
+
+    def done(self):
+        sName = self.name.text.strip()
+        self._oParent.add_minion(sName)
+        self.dismiss()
 
 
 class PlayerScreen(RelativeLayout):
@@ -43,8 +58,18 @@ class PlayerScreen(RelativeLayout):
         self.aMasters = []
         self.unhighlight_player()
 
-    def add_minion(self):
-        sMinion = 'Minion %d' % (len(self.aMinions) + 1)
+    def ask_minion_name(self):
+        oPopup = MinionName(self)
+        oPopup.open()
+
+    def add_minion(self, sMinion):
+        if not sMinion:
+            sMinion = 'Minion %d' % (len(self.aMinions) + 1)
+        iCount = 2
+        sOrig = sMinion
+        while sMinion in self.aMinions:
+            sMinion = '%s %d' % (sOrig, iCount)
+            iCount += 1
         self.aMinions.append(sMinion)
         self._update_game()
 
