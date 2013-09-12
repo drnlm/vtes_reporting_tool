@@ -321,11 +321,11 @@ class PlayerSelectWidget(Widget):
                 aPlayers.append(oPlayer.text.strip())
                 if oDeck.text.strip():
                     dDecks[oPlayer.text.strip()] = oDeck.text.strip()
-
-        if self._sMode == 'Start':
-            self.parent.start_game(aPlayers, dDecks)
-        else:
-            self.parent.resume_game(aPlayers, dDecks)
+        if aPlayers:
+            if self._sMode == 'Start':
+                self.parent.start_game(aPlayers, dDecks)
+            else:
+                self.parent.resume_game(aPlayers, dDecks)
 
 
 class GameWidget(BoxLayout):
