@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# vim:fileencoding=utf-8 ai ts=4 sts=4 et sw=4
+# Copyright 2013 Neil Muller <drnlmuller+sutekh@gmail.com>
+# GPL v2 or later - see LICENSE & GPL.txt for details
+
+"""A simple tool for helping track VTES games on android phones"""
+
 import kivy
 
 kivy.require('1.6.0')
