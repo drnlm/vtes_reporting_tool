@@ -4,6 +4,7 @@ GameWidget:
 
 <PlayerSelectWidget>:
     input_area: input
+    start_button: start
     Label:
         font_size: 15
         top: root.height
@@ -17,9 +18,10 @@ GameWidget:
         height: root.height - 160
         width: root.width
     Button:
+        id: start
         top: self.height
         right: 20 + self.width
-        text: "Start Game"
+        text: "Start"
         on_release: root.start()
     Button:
         top: self.height
@@ -57,19 +59,26 @@ GameWidget:
         on_release: root.change(+1)
     Button:
         size: 120, 40
-        pos_hint: {'left': 0.1}
+        pos_hint: {'x': 0}
         size_hint: None, None
         text: "Next Turn"
         on_release: root.next_turn()
     Button:
         size: 120, 40
-        pos_hint: {'right': 0.5}
+        pos_hint: {'right': 0.4}
         size_hint: None, None
         text: "Oust Player"
         on_release: root.oust()
     Button:
         size: 120, 40
-        pos_hint: {'right': 0.9}
+        pos_hint: {'right': 0.6}
+        size_hint: None, None
+        text: "Update Decks"
+        on_release: root.update_decks()
+
+    Button:
+        size: 120, 40
+        pos_hint: {'right': 1}
         size_hint: None, None
         text: "Stop Game"
         on_release: root.stop_game()

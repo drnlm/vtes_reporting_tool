@@ -32,13 +32,6 @@ class PlayerScreen(RelativeLayout):
         self._bHighlight = False
         self.unhighlight_player()
 
-    def update_deck(self, sDeck):
-        self._sDeck = sDeck
-        if self._bHighlight:
-            self.highlight_player()
-        else:
-            self.unhighlight_player()
-
     def change(self, iDir):
         self.oParent.change(iDir)
 
@@ -47,6 +40,13 @@ class PlayerScreen(RelativeLayout):
 
     def oust(self):
         self.oParent.oust()
+
+    def set_details(self, sPlayer, sDeck):
+        self._sPlayer = sPlayer
+        self._sDeck = sDeck
+
+    def update_decks(self):
+        self.oParent.update_decks()
 
     def stop_game(self):
         self.oParent.stop_game()
@@ -101,6 +101,17 @@ class GameReportWidget(Carousel):
     def set_decks(self, dDecks):
         self.dDecks = dDecks
 
+    def update_details(self):
+        for oScreen, sPlayer in zip(self.slides, self.aPlayers):
+            if sPlayer in self.dDecks:
+                sDeck = self.dDecks[sPlayer]
+            else:
+                sDeck = ''
+            oScreen.set_details(sPlayer, sDeck)
+        for oScreen in self.slides:
+            oScreen.unhighlight_player()
+        self.slides[self.iCur].highlight_player()
+
     def add_screens(self):
         for oWidget in self.children[:]:
             self.remove_widget(oWidget)
@@ -138,6 +149,9 @@ class GameReportWidget(Carousel):
     def oust(self):
         pass
 
+    def update_decks(self):
+        self.oParent.update_decks()
+
     def stop_game(self):
         self.oParent.stop_game()
 
@@ -145,9 +159,11 @@ class GameReportWidget(Carousel):
 class PlayerSelectWidget(Widget):
 
     input_area = ObjectProperty(None)
+    start_button = ObjectProperty(None)
 
     def __init__(self, oParent):
         super(PlayerSelectWidget, self).__init__()
+        self._sMode = 'Start'
         self.oParent = oParent
         self._aNameWidgets = []
         self._aDeckWidgets = []
@@ -173,6 +189,14 @@ class PlayerSelectWidget(Widget):
             self.input_area.add_widget(oTextInput)
             self._aDeckWidgets.append(oTextInput)
 
+    def set_start_mode(self):
+        self._sMode = 'Start'
+        self.start_button.text = self._sMode
+
+    def set_resume_mode(self):
+        self._sMode = 'Resume'
+        self.start_button.text = self._sMode
+
     def start(self):
         aPlayers = []
         dDecks = {}
@@ -181,7 +205,11 @@ class PlayerSelectWidget(Widget):
                 aPlayers.append(oPlayer.text.strip())
                 if oDeck.text.strip():
                     dDecks[oPlayer.text.strip()] = oDeck.text.strip()
-        self.parent.start_game(aPlayers, dDecks)
+
+        if self._sMode == 'Start':
+            self.parent.start_game(aPlayers, dDecks)
+        else:
+            self.parent.resume_game(aPlayers, dDecks)
 
 
 class GameWidget(BoxLayout):
@@ -203,7 +231,20 @@ class GameWidget(BoxLayout):
     def stop_game(self):
         self.remove_widget(self.game)
         self.game = None
+        self.select.set_start_mode()
         self.add_widget(self.select)
+
+    def update_decks(self):
+        self.remove_widget(self.game)
+        self.select.set_resume_mode()
+        self.add_widget(self.select)
+
+    def resume_game(self, aPlayers, dDecks):
+        self.game.set_players(aPlayers)
+        self.game.set_decks(dDecks)
+        self.game.update_details()
+        self.remove_widget(self.select)
+        self.add_widget(self.game)
 
 
 class VTESGameApp(App):
