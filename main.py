@@ -2,7 +2,7 @@ import kivy
 
 kivy.require('1.6.0')
 
-from kivy.logger import Logger, LoggerHistory
+#from kivy.logger import Logger, LoggerHistory
 #for hdlr in Logger.handlers[:]:
 #   if not isinstance(hdlr, LoggerHistory):
 #       Logger.removeHandler(hdlr)
@@ -41,7 +41,7 @@ class PlayerScreen(RelativeLayout):
 
     def change(self, iDir):
         self.oParent.change(iDir)
-        
+
     def next_turn(self):
         self.oParent.next_turn()
 
@@ -56,24 +56,29 @@ class PlayerScreen(RelativeLayout):
             self.player.remove_widget(label)
         if self._sDeck:
             label = Label(text="[b][color=00ffff]%s [i](playing %s)[/i]"
-                "[/color][/b]" % (escape_markup(self._sPlayer),
-                    escape_markup(self._sDeck)), font_size=20, markup=True)
+                          "[/color][/b]" % (escape_markup(self._sPlayer),
+                                            escape_markup(self._sDeck)),
+                          font_size=20, markup=True)
         else:
             label = Label(text="[b][color=00ffff]%s [i](unspecfied)"
-                    "[/i][/color][/b] " % escape_markup(self._sPlayer),
-                font_size=20, markup=True)
+                               "[/i][/color][/b] " % escape_markup(
+                                   self._sPlayer),
+                               font_size=20, markup=True)
         self.player.add_widget(label)
 
     def unhighlight_player(self):
         for label in self.player.children[:]:
             self.player.remove_widget(label)
         if self._sDeck:
-            label = Label(text="[b][color=aaaaaa]%s [i](playing %s)[/i]"
+            label = Label(
+                text="[b][color=aaaaaa]%s [i](playing %s)[/i]"
                 "[/color][/b]" % (escape_markup(self._sPlayer),
-                    escape_markup(self._sDeck)), font_size=15, markup=True)
+                                  escape_markup(self._sDeck)),
+                font_size=15, markup=True)
         else:
-            label = Label(text="[b][color=aaaaaa]%s [i](unspecfied)"
-                    "[/i][/color][/b] " % escape_markup(self._sPlayer),
+            label = Label(
+                text="[b][color=aaaaaa]%s [i](unspecfied)"
+                "[/i][/color][/b] " % escape_markup(self._sPlayer),
                 font_size=15, markup=True)
         self.player.add_widget(label)
 
@@ -137,7 +142,6 @@ class GameReportWidget(Carousel):
         self.oParent.stop_game()
 
 
-
 class PlayerSelectWidget(Widget):
 
     input_area = ObjectProperty(None)
@@ -148,22 +152,24 @@ class PlayerSelectWidget(Widget):
         self._aNameWidgets = []
         self._aDeckWidgets = []
         for i in range(1, 8):
-            bot = 1 - 0.125*i
+            bot = 1 - 0.125 * i
             print bot
             self.input_area.add_widget(Label(text="Player %d : " % i,
-                size_hint=(0.2, 0.1),
-                pos_hint={'right' : 0.2, 'center_y': bot }))
+                                             size_hint=(0.2, 0.1),
+                                             pos_hint={'right': 0.2,
+                                                       'center_y': bot}))
             oTextInput = TextInput(multiline=False,
-                size_hint=(0.3, 0.075),
-                pos_hint={'right' : 0.5, 'center_y': bot })
+                                   size_hint=(0.3, 0.075),
+                                   pos_hint={'right': 0.5, 'center_y': bot})
             self.input_area.add_widget(oTextInput)
             self._aNameWidgets.append(oTextInput)
             self.input_area.add_widget(Label(text=" playing Deck : ",
-                size_hint=(0.2, 0.1),
-                pos_hint={'right' : 0.7, 'center_y': bot }))
+                                             size_hint=(0.2, 0.1),
+                                             pos_hint={'right': 0.7,
+                                                       'center_y': bot}))
             oTextInput = TextInput(multiline=False,
-                size_hint=(0.3, 0.075),
-                pos_hint={'right' : 1, 'center_y': bot })
+                                   size_hint=(0.3, 0.075),
+                                   pos_hint={'right': 1, 'center_y': bot})
             self.input_area.add_widget(oTextInput)
             self._aDeckWidgets.append(oTextInput)
 
@@ -202,10 +208,10 @@ class GameWidget(BoxLayout):
 
 class VTESGameApp(App):
 
-   title = "VTES Game Reporter"
+    title = "VTES Game Reporter"
 
-   def build(self):
-       return GameWidget()
+    def build(self):
+        return GameWidget()
 
 if __name__ == "__main__":
-   VTESGameApp().run()
+    VTESGameApp().run()
