@@ -197,7 +197,6 @@ class PlayerSelectWidget(Widget):
         self._aDeckWidgets = []
         for i in range(1, 8):
             bot = 1 - 0.125 * i
-            print bot
             self.input_area.add_widget(Label(text="Player %d : " % i,
                                              size_hint=(0.2, 0.1),
                                              pos_hint={'right': 0.2,
