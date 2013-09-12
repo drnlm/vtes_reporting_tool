@@ -111,6 +111,13 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         self._update_game()
 
+    def get_turn_status(self):
+        if self._bOusted:
+            return '%s (ousted)' % self._sPlayer
+        sMinions = '),  ('.join(self.aMinions)
+        return '%s: %d pool, minions: (%s)' % (self._sPlayer,
+                                               self.iPool, sMinions)
+
     def unhighlight_player(self):
         for label in self.player.children[:]:
             self.player.remove_widget(label)
@@ -152,7 +159,7 @@ class GameReportWidget(Carousel):
         self.iScreen = 0
         self.aPlayers = []
         self.dDecks = {}
-        self.aLog = []
+        self.dLog = {}
         self.iRound = 1
         self.aOusted = set()
         self.loop = True
@@ -202,6 +209,9 @@ class GameReportWidget(Carousel):
     def get_round(self):
         return self.iRound, self.iCur + 1, len(self.aPlayers)
 
+    def get_round_key(self):
+        return '%d.%d' % (self.iRound, self.iCur + 1)
+
     def next_turn(self):
         self.step_current()
         if len(self.aOusted) == len(self.aPlayers):
@@ -209,11 +219,14 @@ class GameReportWidget(Carousel):
         else:
             while self.iCur in self.aOusted:
                 self.step_current()
+        aTurn = []
         for oScreen in self.slides:
             oScreen.unhighlight_player()
+            aTurn.append(oScreen.get_turn_status())
         if self.iCur not in self.aOusted:
             self.slides[self.iCur].highlight_player()
         # We set things up so we can animate a scroll to the current player
+        self.dLog[self.get_round_key()] = '\n'.join(aTurn)
         if self.index != self.iCur:
             if self.iCur > 0:
                 self.index = self.iCur - 1
@@ -232,6 +245,7 @@ class GameReportWidget(Carousel):
 
     def stop_game(self):
         self.oParent.stop_game()
+        print self.dLog
 
 
 class PlayerSelectWidget(Widget):
