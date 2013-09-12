@@ -36,7 +36,7 @@ class PlayerScreen(RelativeLayout):
         self.oParent = oParent
         self._sPlayer = sPlayer
         self._sDeck = sDeck
-        self._bHighlight = False
+        self._bOusted = False
         self.unhighlight_player()
 
     def change(self, iDir):
@@ -46,6 +46,7 @@ class PlayerScreen(RelativeLayout):
         self.oParent.next_turn()
 
     def oust(self):
+        self._bOusted = True
         self.oParent.oust()
 
     def set_details(self, sPlayer, sDeck):
@@ -76,16 +77,23 @@ class PlayerScreen(RelativeLayout):
     def unhighlight_player(self):
         for label in self.player.children[:]:
             self.player.remove_widget(label)
+        if not self._bOusted:
+            sColor = 'aaaaaa'
+            sOusted = ''
+        else:
+            sColor = 'ff3333'
+            sOusted = ' (ousted)'
         if self._sDeck:
             label = Label(
-                text="[b][color=aaaaaa]%s [i](playing %s)[/i]"
-                "[/color][/b]" % (escape_markup(self._sPlayer),
-                                  escape_markup(self._sDeck)),
+                text="[b][color=%s]%s [i](playing %s)%s[/i]"
+                "[/color][/b]" % (sColor, escape_markup(self._sPlayer),
+                                  escape_markup(self._sDeck), sOusted),
                 font_size=15, markup=True)
         else:
             label = Label(
-                text="[b][color=aaaaaa]%s [i](unspecfied)"
-                "[/i][/color][/b] " % escape_markup(self._sPlayer),
+                text="[b][color=%s]%s [i](unspecfied)%s"
+                "[/i][/color][/b] " % (sColor, escape_markup(self._sPlayer),
+                                       sOusted),
                 font_size=15, markup=True)
         self.player.add_widget(label)
 
@@ -100,6 +108,7 @@ class GameReportWidget(Carousel):
         self.aPlayers = []
         self.dDecks = {}
         self.aLog = []
+        self.aOusted = set()
         self.loop = True
 
     def set_players(self, aPlayers):
@@ -138,13 +147,22 @@ class GameReportWidget(Carousel):
         else:
             self.load_next()
 
-    def next_turn(self):
+    def step_current(self):
         self.iCur += 1
         if self.iCur >= len(self.aPlayers):
             self.iCur = 0
+
+    def next_turn(self):
+        self.step_current()
+        if len(self.aOusted) == len(self.aPlayers):
+            self.iCur = 0
+        else:
+            while self.iCur in self.aOusted:
+                self.step_current()
         for oScreen in self.slides:
             oScreen.unhighlight_player()
-        self.slides[self.iCur].highlight_player()
+        if self.iCur not in self.aOusted:
+            self.slides[self.iCur].highlight_player()
         # We set things up so we can animate a scroll to the current player
         if self.index != self.iCur:
             if self.iCur > 0:
@@ -154,7 +172,10 @@ class GameReportWidget(Carousel):
             self.load_next()
 
     def oust(self):
-        pass
+        self.aOusted.add(self.index)
+        self.slides[self.index].unhighlight_player()
+        if self.index == self.iCur:
+            self.next_turn()
 
     def update_decks(self):
         self.oParent.update_decks()
