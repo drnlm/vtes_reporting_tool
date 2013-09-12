@@ -62,8 +62,8 @@ class PlayerScreen(RelativeLayout):
             if not isinstance(widget, Button):
                 self.game.remove_widget(widget)
         oPool = Label(text="[color=ff0022]%d[/color]" % self.iPool,
-                markup=True, pos_hint={'right': 1, 'top': 1},
-                size_hint=(None, None))
+                      markup=True, pos_hint={'right': 1, 'top': 1},
+                      size_hint=(None, None))
         self.game.add_widget(oPool)
         y = 0.9
         for sMinion in self.aMinions:
