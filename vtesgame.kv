@@ -39,12 +39,40 @@ GameWidget:
         size: root.width, 50
         size_hint: None, None
         pos_hint: {'top': 1}
-    FloatLayout:
-        id: game
-        # We'll fill this in dynamically, so we keep references
-        # to the text input fields easily
+    ScrollView:
         size: root.width, 400
         size_hint: None, None
+        pos_hint: {'right': 1, 'top': 0.9}
+        RelativeLayout:
+            id: game
+            # We'll fill this in dynamically, so we keep references
+            # to the text input fields easily
+            size: root.width, 800
+            size_hint: None, None
+            Button:
+                size: 120, 40
+                size_hint: None, None
+                pos_hint: {'right': 1, 'top': 1}
+                text: "Pool +"
+                on_release: root.change_pool(+1)
+            Button:
+                size: 120, 40
+                size_hint: None, None
+                pos_hint: {'right': 0.2, 'top': 1}
+                text: "Pool -"
+                on_release: root.change_pool(-1)
+            Button:
+                size: 120, 40
+                size_hint: None, None
+                pos_hint: {'right': 0.2, 'top': 0.95}
+                text: "Add Master"
+                on_release: root.add_master()
+            Button:
+                size: 120, 40
+                size_hint: None, None
+                pos_hint: {'right': 0.4, 'top': 0.95}
+                text: "Add Minion"
+                on_release: root.add_minion()
     Button:
         size: 120, 40
         pos_hint: {'left': 0, 'top': 0.15}

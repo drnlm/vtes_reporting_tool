@@ -18,6 +18,7 @@ kivy.require('1.6.0')
 from kivy.app import App
 from kivy.utils import escape_markup
 from kivy.uix.widget import Widget
+from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
@@ -37,7 +38,40 @@ class PlayerScreen(RelativeLayout):
         self._sPlayer = sPlayer
         self._sDeck = sDeck
         self._bOusted = False
+        self.iPool = 30
+        self.aMinions = []
+        self.aMasters = []
         self.unhighlight_player()
+
+    def add_minion(self):
+        sMinion = 'Minion %d' % (len(self.aMinions) + 1)
+        self.aMinions.append(sMinion)
+        self._update_game()
+
+    def add_master(self):
+        sMaster = 'Master %d' % (len(self.aMasters) + 1)
+        self.aMasters.append(sMaster)
+        self._update_game()
+
+    def change_pool(self, iChg):
+        self.iPool += iChg
+        self._update_game()
+
+    def _update_game(self):
+        for widget in self.game.children[:]:
+            if not isinstance(widget, Button):
+                self.game.remove_widget(widget)
+        oPool = Label(text="[color=ff0022]%d[/color]" % self.iPool,
+                markup=True, pos_hint={'right': 1, 'top': 1},
+                size_hint=(None, None))
+        self.game.add_widget(oPool)
+        y = 0.9
+        for sMinion in self.aMinions:
+            oMinion = Label(text=sMinion,
+                            pos_hint={'right': 0.3, 'top': y},
+                            size_hint=(None, None))
+            y -= 0.1
+            self.game.add_widget(oMinion)
 
     def change(self, iDir):
         self.oParent.change(iDir)
@@ -75,6 +109,7 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
+        self._update_game()
 
     def unhighlight_player(self):
         for label in self.player.children[:]:
@@ -100,6 +135,7 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
+        self._update_game()
 
     def _get_round_label(self):
         label = Label(text="[color=33ff33]Round %d.%d (%d players)[/color]"
