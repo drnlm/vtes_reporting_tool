@@ -9,6 +9,7 @@ from kivy.logger import Logger, LoggerHistory
 
 
 from kivy.app import App
+from kivy.utils import escape_markup
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
@@ -26,11 +27,17 @@ class PlayerScreen(RelativeLayout):
     def __init__(self, oParent, sPlayer, sDeck):
         super(PlayerScreen, self).__init__()
         self.oParent = oParent
-        if sDeck:
-            label = Label(text="%s (playing %s)" % (sPlayer, sDeck))
+        self._sPlayer = sPlayer
+        self._sDeck = sDeck
+        self._bHighlight = False
+        self.unhighlight_player()
+
+    def update_deck(self, sDeck):
+        self._sDeck = sDeck
+        if self._bHighlight:
+            self.highlight_player()
         else:
-            label = Label(text="%s (unspecfied)" % sPlayer)
-        self.player.add_widget(label)
+            self.unhighlight_player()
 
     def change(self, iDir):
         self.oParent.change(iDir)
@@ -44,6 +51,32 @@ class PlayerScreen(RelativeLayout):
     def stop_game(self):
         self.oParent.stop_game()
 
+    def highlight_player(self):
+        for label in self.player.children[:]:
+            self.player.remove_widget(label)
+        if self._sDeck:
+            label = Label(text="[b][color=00ffff]%s [i](playing %s)[/i]"
+                "[/color][/b]" % (escape_markup(self._sPlayer),
+                    escape_markup(self._sDeck)), font_size=20, markup=True)
+        else:
+            label = Label(text="[b][color=00ffff]%s [i](unspecfied)"
+                    "[/i][/color][/b] " % escape_markup(self._sPlayer),
+                font_size=20, markup=True)
+        self.player.add_widget(label)
+
+    def unhighlight_player(self):
+        for label in self.player.children[:]:
+            self.player.remove_widget(label)
+        if self._sDeck:
+            label = Label(text="[b][color=aaaaaa]%s [i](playing %s)[/i]"
+                "[/color][/b]" % (escape_markup(self._sPlayer),
+                    escape_markup(self._sDeck)), font_size=15, markup=True)
+        else:
+            label = Label(text="[b][color=aaaaaa]%s [i](unspecfied)"
+                    "[/i][/color][/b] " % escape_markup(self._sPlayer),
+                font_size=15, markup=True)
+        self.player.add_widget(label)
+
 
 class GameReportWidget(Carousel):
 
@@ -55,7 +88,6 @@ class GameReportWidget(Carousel):
         self.aPlayers = []
         self.dDecks = {}
         self.aLog = []
-        self.aScreens = []
         self.loop = True
 
     def set_players(self, aPlayers):
@@ -67,22 +99,17 @@ class GameReportWidget(Carousel):
     def add_screens(self):
         for oWidget in self.children[:]:
             self.remove_widget(oWidget)
-        self.aScreens = []
         for sPlayer in self.aPlayers:
             if sPlayer in self.dDecks:
                 sDeck = self.dDecks[sPlayer]
             else:
                 sDeck = ''
             oScreen = PlayerScreen(self, sPlayer, sDeck)
-            self.aScreens.append(sPlayer)
             self.add_widget(oScreen)
+        self.slides[self.iCur].highlight_player()
 
     def change(self, iDir):
         self.iScreen += iDir
-        if self.iScreen < 0:
-            self.iScreen = len(self.aScreens) - 1
-        elif self.iScreen >= len(self.aScreens):
-            self.iScreen = 0
         if iDir < 0:
             self.load_previous()
         else:
@@ -92,9 +119,16 @@ class GameReportWidget(Carousel):
         self.iCur += 1
         if self.iCur >= len(self.aPlayers):
             self.iCur = 0
-        # scoll to the current player
-        if self.aScreens[self.iCur] != self.current_slide:
-            self.index = self.iCur
+        for oScreen in self.slides:
+            oScreen.unhighlight_player()
+        self.slides[self.iCur].highlight_player()
+        # We set things up so we can animate a scroll to the current player
+        if self.index != self.iCur:
+            if self.iCur > 0:
+                self.index = self.iCur - 1
+            else:
+                self.index = len(self.aPlayers) - 1
+            self.load_next()
 
     def oust(self):
         pass
