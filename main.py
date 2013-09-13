@@ -5,9 +5,11 @@
 
 """A simple tool for helping track VTES games on android phones"""
 
+import os
+import datetime
 import kivy
 
-kivy.require('1.6.0')
+kivy.require('1.7.0')
 
 #from kivy.logger import Logger, LoggerHistory
 #for hdlr in Logger.handlers[:]:
@@ -252,7 +254,7 @@ class GameReportWidget(Carousel):
         if self.iCur not in self.aOusted:
             self.slides[self.iCur].highlight_player()
         # We set things up so we can animate a scroll to the current player
-        self.dLog[self.get_round_key()] = '\n'.join(aTurn)
+        self.dLog[self.get_round_key()] = aTurn
         if self.index != self.iCur:
             if self.iCur > 0:
                 self.index = self.iCur - 1
@@ -271,9 +273,23 @@ class GameReportWidget(Carousel):
 
     def stop_game(self):
         self.oParent.stop_game()
-        print self._oApp.config.get('vtes_report', 'logpath')
-        print self._oApp.config.get('vtes_report', 'logprefix')
-        print self.dLog
+        sLogPath = self._oApp.config.get('vtes_report', 'logpath')
+        sLogPrefix = self._oApp.config.get('vtes_report', 'logprefix')
+        if not os.path.exists(sLogPath):
+            os.makedirs(sLogPath)
+        if not os.path.isdir(sLogPath):
+            # FIXME: error popups and so forth
+            return
+        oDate = datetime.datetime.utcnow()
+        sLogFile = "%s_%s.log" % (sLogPrefix, oDate.strftime('%Y-%m-%d_%H:%M'))
+        sLogFile = os.path.join(sLogPath, sLogFile)
+        aLog = []
+        for sRound in sorted(self.dLog):
+            aLog.append(sRound)
+            for sPlayerInfo in self.dLog[sRound]:
+                aLog.append('   %s' % sPlayerInfo)
+        with open(sLogFile, 'w') as f:
+            f.write('\n'.join(aLog))
 
 
 class PlayerSelectWidget(Widget):
@@ -382,7 +398,7 @@ class VTESGameApp(App):
     def build_config(self, config):
         config.setdefaults('vtes_report',
                            {'logpath': '/sdcard/VTES/',
-                            'logprefix': 'VTES_Game_'})
+                            'logprefix': 'VTES_Game'})
 
     def build_settings(self, settings):
         config_json = """[
