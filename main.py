@@ -177,7 +177,7 @@ class PlayerScreen(RelativeLayout):
 
 class GameReportWidget(Carousel):
 
-    def __init__(self, oParent):
+    def __init__(self, oParent, oApp):
         super(GameReportWidget, self).__init__()
         self.oParent = oParent
         self.iCur = 0
@@ -188,6 +188,7 @@ class GameReportWidget(Carousel):
         self.iRound = 1
         self.aOusted = set()
         self.loop = True
+        self._oApp = oApp
 
     def set_players(self, aPlayers):
         self.aPlayers = aPlayers
@@ -270,6 +271,8 @@ class GameReportWidget(Carousel):
 
     def stop_game(self):
         self.oParent.stop_game()
+        print self._oApp.config.get('vtes_report', 'logpath')
+        print self._oApp.config.get('vtes_report', 'logprefix')
         print self.dLog
 
 
@@ -334,10 +337,14 @@ class GameWidget(BoxLayout):
         super(GameWidget, self).__init__()
         self.select = PlayerSelectWidget(self)
         self.game = None
+        self._oApp = None
         self.add_widget(self.select)
 
+    def set_app(self, oApp):
+        self._oApp = oApp
+
     def start_game(self, aPlayers, dDecks):
-        self.game = GameReportWidget(self)
+        self.game = GameReportWidget(self, self._oApp)
         self.remove_widget(self.select)
         self.game.set_players(aPlayers)
         self.game.set_decks(dDecks)
@@ -368,7 +375,9 @@ class VTESGameApp(App):
     title = "VTES Game Reporter"
 
     def build(self):
-        return GameWidget()
+        oMain = GameWidget()
+        oMain.set_app(self)
+        return oMain
 
     def build_config(self, config):
         config.setdefaults('vtes_report',
