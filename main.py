@@ -370,5 +370,35 @@ class VTESGameApp(App):
     def build(self):
         return GameWidget()
 
+    def build_config(self, config):
+        config.setdefaults('vtes_report',
+                           {'logpath': '/sdcard/VTES/',
+                            'logprefix': 'VTES_Game_'})
+
+    def build_settings(self, settings):
+        config_json = """[
+            { "type": "title",
+              "title": "VTES Game Reporting App"
+            },
+
+            { "type": "string",
+              "title": "Log Path",
+              "desc": "Path to save log files to",
+              "section": "vtes_report",
+              "key": "logpath"
+            },
+
+            {
+              "type": "string",
+              "title": "Prefix",
+              "desc": "Prefix to use when generating log files",
+              "section": "vtes_report",
+              "key": "logprefix"
+            }
+            ]"""
+        settings.add_json_panel("VTES Game Reporting",
+                                self.config, data=config_json)
+
+
 if __name__ == "__main__":
     VTESGameApp().run()
