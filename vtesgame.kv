@@ -31,6 +31,43 @@ GameWidget:
 
 <GameReportManager>:
 
+
+<MinionRow>:
+    name: name
+    torpor: torpor
+    size_hint: 1, 0.075
+    Label:
+        id: name
+        size_hint: 0.4, 1
+        text: ''
+        pos_hint: {'x': 0, 'top': 0}
+    Button:
+        size_hint: 0.2, 1
+        text: 'Burn / remove'
+        pos_hint: {'x': 0.4, 'top': 0}
+        on_release: root.burn()
+    Button:
+        id: torpor
+        size_hint: 0.2, 1
+        text: 'Topor'
+        pos_hint: {'x': 0.6, 'top': 0}
+        on_release: root.do_torpor()
+    Button:
+        size_hint: 0.2, 1
+        text: 'Act'
+        pos_hint: {'x': 0.8, 'top': 0}
+        on_release: root.other()
+
+<MasterRow>:
+    name: name
+    Label:
+        id: name
+        size: 200, 30
+        font_size: 10
+        text: ''
+        pos_hint: {'x': 0, 'top': 0.3}
+
+
 <PlayerScreen>:
     game: game
     player: player

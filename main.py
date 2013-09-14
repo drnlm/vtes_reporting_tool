@@ -44,6 +44,68 @@ class MinionName(Popup):
         self.dismiss()
 
 
+class MinionRow(BoxLayout):
+
+    name = ObjectProperty(None)
+    torpor = ObjectProperty(None)
+
+    def __init__(self, sName, oParent, **kwargs):
+        super(MinionRow, self).__init__(**kwargs)
+        self._sName = sName
+        self.name.text = sName
+        self.aActions = []
+        self.bTorpor = False
+        self.bBurnt = False
+        self._oParent = oParent
+        self.iTorporCount = 0
+        print self.width
+
+    def vote(self):
+        self.aActions.append('attempted a vote')
+
+    def bleed(self):
+        self.aActions.append('attempted to bleed')
+
+    def other(self):
+        self.aActions.append('attempted an action')
+
+    def burn(self):
+        self.bBurnt = True
+        self._oParent._update_game()
+
+    def get_actions(self):
+        if not self.aActions:
+            sResult = '%s (no actions).' % self._sName
+        else:
+            sResult = '%s (%s).' % (self._sName, ' & '.join(self.aActions))
+        if self.iTorporCount > 1:
+            sResult += ' Was sent to topor / incapicated (%d times)' % (
+                self.iTorporCount)
+        elif self.iTorporCount:
+            sResult += ' Was sent to topor / incapicated.'
+        if self.bBurnt:
+            sResult += ' Was burnt.'
+        elif self.bTorpor:
+            sResult += ' in torpor / incapicated'
+        else:
+            sResult += ' ready'
+        self.aActions = []
+        self.iTorporCount = 0
+        return sResult
+
+    def is_burnt(self):
+        return self.bBurnt
+
+    def do_torpor(self):
+        self.bTorpor = not self.bTorpor
+        if self.bTorpor:
+            self.iTorporCount += 1
+            self.torpor.text = 'Leave Torpor'
+        else:
+            self.torpor.text = 'Torpor'
+        self._oParent._update_game()
+
+
 class PlayerScreen(RelativeLayout):
 
     game = ObjectProperty(None)
@@ -58,7 +120,9 @@ class PlayerScreen(RelativeLayout):
         self.iPool = 30
         self.aMinions = []
         self.aMasters = []
+        self._aBurnt = set()
         self.unhighlight_player()
+        self._dMinions = {}
 
     def ask_minion_name(self):
         oPopup = MinionName(self)
@@ -69,7 +133,7 @@ class PlayerScreen(RelativeLayout):
             sMinion = 'Minion %d' % (len(self.aMinions) + 1)
         iCount = 2
         sOrig = sMinion
-        while sMinion in self.aMinions:
+        while sMinion in self._dMinions:
             sMinion = '%s %d' % (sOrig, iCount)
             iCount += 1
         self.aMinions.append(sMinion)
@@ -94,11 +158,18 @@ class PlayerScreen(RelativeLayout):
         self.game.add_widget(oPool)
         y = 0.9
         for sMinion in self.aMinions:
-            oMinion = Label(text=sMinion,
-                            pos_hint={'right': 0.3, 'top': y},
-                            size_hint=(None, None))
-            y -= 0.1
-            self.game.add_widget(oMinion)
+            if sMinion in self._dMinions:
+                oMinion = self._dMinions[sMinion]
+                if oMinion.is_burnt():
+                    oMinion = None
+            else:
+                oMinion = MinionRow(sMinion, self,
+                                    pos_hint={'x': 0, 'top': y},
+                                    size_hint=(None, None))
+                self._dMinions[sMinion] = oMinion
+            if oMinion:
+                y -= 0.1
+                self.game.add_widget(oMinion)
 
     def change(self, iDir):
         self.oParent.change(iDir)
@@ -141,7 +212,17 @@ class PlayerScreen(RelativeLayout):
     def get_turn_status(self):
         if self._bOusted:
             return '%s (ousted)' % self._sPlayer
-        sMinions = '),  ('.join(self.aMinions)
+        aMinions = []
+        for sMinion, oWidget in self._dMinions.iteritems():
+            if oWidget.is_burnt():
+                if sMinion is self._aBurnt:
+                    # Previously reported burn
+                    continue
+                else:
+                    self._aBurnt.add(sMinion)
+            sActions = oWidget.get_actions()
+            aMinions.append('%s - {%s}' % (sMinion, sActions))
+        sMinions = '),  ('.join(aMinions)
         return '%s: %d pool, minions: (%s)' % (self._sPlayer,
                                                self.iPool, sMinions)
 
@@ -290,6 +371,7 @@ class GameReportWidget(Carousel):
                 aLog.append('   %s' % sPlayerInfo)
         with open(sLogFile, 'w') as f:
             f.write('\n'.join(aLog))
+        f.write('\n')
 
 
 class PlayerSelectWidget(Widget):
