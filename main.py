@@ -322,6 +322,8 @@ class GameReportWidget(Carousel):
         return '%d.%d' % (self.iRound, self.iCur + 1)
 
     def next_turn(self):
+        # Log the current turn and advance the turn
+        sKey = self.get_round_key()
         self.step_current()
         if len(self.aOusted) == len(self.aPlayers):
             self.iCur = 0
@@ -334,8 +336,8 @@ class GameReportWidget(Carousel):
             aTurn.append(oScreen.get_turn_status())
         if self.iCur not in self.aOusted:
             self.slides[self.iCur].highlight_player()
+        self.dLog[sKey] = aTurn
         # We set things up so we can animate a scroll to the current player
-        self.dLog[self.get_round_key()] = aTurn
         if self.index != self.iCur:
             if self.iCur > 0:
                 self.index = self.iCur - 1
