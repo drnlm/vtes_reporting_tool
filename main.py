@@ -372,7 +372,7 @@ class GameReportWidget(Carousel):
                 aLog.append('   %s' % sPlayerInfo)
         with open(sLogFile, 'w') as f:
             f.write('\n'.join(aLog))
-        f.write('\n')
+            f.write('\n')
 
 
 class PlayerSelectWidget(Widget):
