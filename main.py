@@ -272,6 +272,7 @@ class GameReportWidget(Carousel):
         self.aOusted = set()
         self.loop = True
         self._oApp = oApp
+        self._oDate = datetime.datetime.utcnow()
 
     def set_players(self, aPlayers):
         self.aPlayers = aPlayers
@@ -356,6 +357,10 @@ class GameReportWidget(Carousel):
 
     def stop_game(self):
         self.oParent.stop_game()
+        self.save_log()
+
+    def save_log(self):
+        """Save the log"""
         sLogPath = self._oApp.config.get('vtes_report', 'logpath')
         sLogPrefix = self._oApp.config.get('vtes_report', 'logprefix')
         if not os.path.exists(sLogPath):
@@ -363,8 +368,8 @@ class GameReportWidget(Carousel):
         if not os.path.isdir(sLogPath):
             # FIXME: error popups and so forth
             return
-        oDate = datetime.datetime.utcnow()
-        sLogFile = "%s_%s.log" % (sLogPrefix, oDate.strftime('%Y-%m-%d_%H:%M'))
+        sLogFile = "%s_%s.log" % (sLogPrefix,
+                                  self._oDate.strftime('%Y-%m-%d_%H:%M'))
         sLogFile = os.path.join(sLogPath, sLogFile)
         aLog = []
         for sRound in sorted(self.dLog):
@@ -457,6 +462,10 @@ class GameWidget(BoxLayout):
         self.select.set_start_mode()
         self.add_widget(self.select)
 
+    def force_save(self):
+        if self.game is not None:
+            self.game.save_log()
+
     def update_decks(self):
         self.remove_widget(self.game)
         self.select.set_resume_mode()
@@ -478,6 +487,13 @@ class VTESGameApp(App):
         oMain = GameWidget()
         oMain.set_app(self)
         return oMain
+
+    def on_stop(self):
+        self.root.force_save()
+
+    def on_pause(self):
+        # Save the current log, in case we don't come back
+        self.root.force_save()
 
     def build_config(self, config):
         config.setdefaults('vtes_report',
