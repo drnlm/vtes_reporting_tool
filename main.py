@@ -40,6 +40,7 @@ class MinionName(Popup):
 
     def done(self):
         sName = self.name.text.strip()
+        self.name.focus = False
         self._oParent.add_minion(sName)
         self.dismiss()
 
