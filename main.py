@@ -58,7 +58,6 @@ class MinionRow(BoxLayout):
         self.bBurnt = False
         self._oParent = oParent
         self.iTorporCount = 0
-        print self.width
 
     def vote(self):
         self.aActions.append('attempted a vote')
