@@ -357,6 +357,11 @@ class GameReportWidget(Carousel):
 
     def stop_game(self):
         self.oParent.stop_game()
+        sKey = self.get_round_key()
+        aTurn = []
+        for oScreen in self.slides:
+            aTurn.append(oScreen.get_turn_status())
+        self.dLog[sKey] = aTurn
         self.save_log()
 
     def save_log(self):
