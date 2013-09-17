@@ -28,10 +28,8 @@ GameWidget:
         text: "Exit"
         on_release: app.stop()
 
-<GameReportManager>:
 
-
-<MinionRow>:
+<MinionRow@BoxLayout>:
     name: name
     torpor: torpor
     size_hint: 1, 0.075
@@ -57,7 +55,8 @@ GameWidget:
         pos_hint: {'x': 0.8, 'top': 0}
         on_release: root.other()
 
-<MasterRow>:
+
+<MasterRow@BoxLayout>:
     name: name
     Label:
         id: name
@@ -66,7 +65,7 @@ GameWidget:
         pos_hint: {'x': 0, 'top': 0.3}
 
 
-<PlayerScreen>:
+<PlayerScreen@RelativeLayout>:
     game: game
     player: player
     BoxLayout:
@@ -147,7 +146,7 @@ GameWidget:
         on_release: root.stop_game()
 
 
-<MinionName>:
+<MinionName@Popup>:
     name: name
     size_hint: .6, .6
     auto_dismiss: False
