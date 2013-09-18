@@ -162,7 +162,7 @@ class PlayerScreen(RelativeLayout):
                       markup=True, pos_hint={'right': 1, 'top': 1},
                       size_hint=(None, None))
         self.game.add_widget(oPool)
-        y = 0.9
+        y = 0.95
         for sMinion in self.aMinions:
             if sMinion in self._dMinions:
                 oMinion = self._dMinions[sMinion]
@@ -174,7 +174,7 @@ class PlayerScreen(RelativeLayout):
                                     size_hint=(None, None))
                 self._dMinions[sMinion] = oMinion
             if oMinion:
-                y -= 0.1
+                y -= 0.035
                 self.game.add_widget(oMinion)
 
     def change(self, iDir):
