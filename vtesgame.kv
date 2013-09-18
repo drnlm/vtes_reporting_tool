@@ -71,12 +71,14 @@ GameWidget:
 <PlayerScreen@RelativeLayout>:
     game: game
     player: player
+    scroll: scroll
     BoxLayout:
         id: player
         size: root.width, 0.1 * root.height
         size_hint: None, None
         pos_hint: {'top': 1}
     ScrollView:
+        id: scroll
         size: root.width, 0.75 * root.height
         size_hint: None, None
         pos_hint: {'right': 1, 'top': 0.9}

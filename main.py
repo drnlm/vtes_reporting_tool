@@ -110,6 +110,7 @@ class PlayerScreen(RelativeLayout):
 
     game = ObjectProperty(None)
     player = ObjectProperty(None)
+    scroll = ObjectProperty(None)
 
     def __init__(self, oParent, sPlayer, sDeck):
         super(PlayerScreen, self).__init__()
@@ -250,6 +251,7 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
+        self.scroll.scroll_y = 1
         self._update_game()
 
     def _get_round_label(self):
