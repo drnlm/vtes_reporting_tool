@@ -18,11 +18,14 @@ GameWidget:
         width: root.width
     Button:
         id: start
+        # Widget subclass, so we fake relative positioning
+        size: 0.25 * root.width, 0.05 * root.height
         top: self.height
         right: 20 + self.width
         text: "Start"
         on_release: root.start()
     Button:
+        size: 0.25 * root.width, 0.05 * root.height
         top: self.height
         right: root.right - 20
         text: "Exit"
@@ -70,78 +73,67 @@ GameWidget:
     player: player
     BoxLayout:
         id: player
-        size: root.width, 50
+        size: root.width, 0.1 * root.height
         size_hint: None, None
         pos_hint: {'top': 1}
     ScrollView:
-        size: root.width, 400
+        size: root.width, 0.75 * root.height
         size_hint: None, None
         pos_hint: {'right': 1, 'top': 0.9}
         RelativeLayout:
             id: game
             # We'll fill this in dynamically, so we keep references
             # to the text input fields easily
-            size: root.width, 800
+            size: root.width, 2*root.height
             size_hint: None, None
             Button:
-                size: 120, 40
-                size_hint: None, None
+                size_hint: 0.25, 0.02
                 pos_hint: {'right': 1, 'top': 1}
                 text: "Pool +"
                 on_release: root.change_pool(+1)
             Button:
-                size: 120, 40
-                size_hint: None, None
+                size_hint: 0.25, 0.02
                 pos_hint: {'right': 0.2, 'top': 1}
                 text: "Pool -"
                 on_release: root.change_pool(-1)
             Button:
-                size: 120, 40
-                size_hint: None, None
-                pos_hint: {'right': 0.2, 'top': 0.95}
+                size_hint: 0.25, 0.025
+                pos_hint: {'x': 0, 'top': 0.975}
                 text: "Add Master"
                 on_release: root.add_master()
             Button:
-                size: 120, 40
-                size_hint: None, None
-                pos_hint: {'right': 0.4, 'top': 0.95}
+                size_hint: 0.25, 0.025
+                pos_hint: {'x': 0.3, 'top': 0.975}
                 text: "Add Minion"
                 on_release: root.ask_minion_name()
     Button:
-        size: 120, 40
-        pos_hint: {'left': 0, 'top': 0.15}
-        size_hint: None, None
+        size_hint: 0.25, 0.05
+        pos_hint: {'x': 0, 'top': 0.15}
         text: "Prev Player <--"
         on_release: root.change(-1)
     Button:
-        size: 120, 40
+        size_hint: 0.25, 0.05
         pos_hint: {'right': 1, 'top': 0.15}
-        size_hint: None, None
         text: "Next Player -->"
         on_release: root.change(+1)
     Button:
-        size: 120, 40
+        size_hint: 0.2, 0.05
         pos_hint: {'x': 0}
-        size_hint: None, None
         text: "Next Turn"
         on_release: root.next_turn()
     Button:
-        size: 120, 40
-        pos_hint: {'right': 0.4}
-        size_hint: None, None
+        size_hint: 0.2, 0.05
+        pos_hint: {'x': 0.25}
         text: "Oust Player"
         on_release: root.oust()
     Button:
-        size: 120, 40
-        pos_hint: {'right': 0.6}
-        size_hint: None, None
+        size_hint: 0.2, 0.05
+        pos_hint: {'x': 0.55}
         text: "Update Decks"
         on_release: root.update_decks()
-
     Button:
-        size: 120, 40
+        size_hint: 0.2, 0.05
         pos_hint: {'right': 1}
-        size_hint: None, None
         text: "Stop Game"
         on_release: root.stop_game()
 
