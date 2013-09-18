@@ -84,8 +84,7 @@ GameWidget:
         pos_hint: {'right': 1, 'top': 0.9}
         RelativeLayout:
             id: game
-            # We'll fill this in dynamically, so we keep references
-            # to the text input fields easily
+            # We'll fill this in dynamically as cards are played
             size: root.width, 2*root.height
             size_hint: None, None
             Button:
@@ -142,16 +141,16 @@ GameWidget:
 
 <MinionName@Popup>:
     name: name
-    size_hint: .6, .6
+    size_hint: .6, .25
     auto_dismiss: False
     title: 'Minion Name'
     BoxLayout:
         orientation: 'vertical'
         TextInput:
             id: name
-            size_hint: 1, None
+            size_hint: 1, 0.15
         Button:
-            size_hint: 0.5, 0.2
+            size_hint: 0.5, 0.1
             pos_hint: {'top': 0.1}
             text: 'Done'
             on_release: root.done()
