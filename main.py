@@ -30,6 +30,34 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.carousel import Carousel
 
 
+class ActionChoice(Popup):
+
+    def __init__(self, oParent):
+        super(ActionChoice, self).__init__()
+        self._oParent = oParent
+
+    def action(self, sType):
+        if sType == 'bleed':
+            self._oParent.bleed()
+        elif sType == 'vote':
+            self._oParent.vote()
+        elif sType == 'hunt':
+            self._oParent.other()
+        elif sType == 'equip':
+            self._oParent.other()
+        elif sType == 'recruit':
+            self._oParent.other()
+        elif sType == 'rush':
+            self._oParent.other()
+        elif sType == 'bloat':
+            self._oParent.other()
+        elif sType == 'govern':
+            self._oParent.other()
+        elif sType == 'other':
+            self._oParent.other()
+        self.dismiss()
+
+
 class MinionName(Popup):
 
     name = ObjectProperty(None)
@@ -73,6 +101,10 @@ class MinionRow(BoxLayout):
 
     def other(self):
         self.aActions.append('attempted an action')
+
+    def ask_action(self):
+        oPopup = ActionChoice(self)
+        oPopup.open()
 
     def burn(self):
         self.bBurnt = True

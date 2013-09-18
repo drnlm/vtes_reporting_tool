@@ -56,7 +56,7 @@ GameWidget:
         size_hint: 0.2, 1
         text: 'Act'
         pos_hint: {'x': 0.8, 'top': 0}
-        on_release: root.other()
+        on_release: root.ask_action()
 
 
 <MasterRow@BoxLayout>:
@@ -161,3 +161,47 @@ GameWidget:
                 pos_hint: {'top': 1}
                 text: 'Cancel'
                 on_release: root.cancel()
+
+
+<ActionChoice@Popup>:
+    size_hint: .6, .6
+    auto_dismiss: False
+    title: 'Action'
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint: 1, 0.1
+            text: 'Bleed'
+            on_release: root.action('bleed')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Vote'
+            on_release: root.action('vote')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Hunt'
+            on_release: root.action('hunt')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Equip / Employ'
+            on_release: root.action('equip')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Recruit / Breed'
+            on_release: root.action('recruit')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Rush'
+            on_release: root.action('rush')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Farm / Bloat'
+            on_release: root.action('bloat')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Bloat down'
+            on_release: root.action('govern')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Other'
+            on_release: root.action('other')
