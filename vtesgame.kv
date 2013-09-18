@@ -149,8 +149,15 @@ GameWidget:
         TextInput:
             id: name
             size_hint: 1, 0.15
-        Button:
-            size_hint: 0.5, 0.1
-            pos_hint: {'top': 0.1}
-            text: 'Done'
-            on_release: root.done()
+        BoxLayout:
+            size_hint: 1, 0.1
+            Button:
+                size_hint: 0.5, 1
+                pos_hint: {'top': 1}
+                text: 'Done'
+                on_release: root.done()
+            Button:
+                size_hint: 0.5, 1
+                pos_hint: {'top': 1}
+                text: 'Cancel'
+                on_release: root.cancel()

@@ -44,6 +44,11 @@ class MinionName(Popup):
         self._oParent.add_minion(sName)
         self.dismiss()
 
+    def cancel(self):
+        sName = None
+        self.name.focus = False
+        self.dismiss()
+
 
 class MinionRow(BoxLayout):
 
