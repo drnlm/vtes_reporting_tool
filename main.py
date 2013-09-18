@@ -198,12 +198,12 @@ class PlayerScreen(RelativeLayout):
             label = Label(text="[b][color=00ffff]%s [i](playing %s)[/i]"
                           "[/color][/b]" % (escape_markup(self._sPlayer),
                                             escape_markup(self._sDeck)),
-                          font_size=20, markup=True)
+                          markup=True)
         else:
             label = Label(text="[b][color=00ffff]%s [i](unspecfied)"
                                "[/i][/color][/b] " % escape_markup(
                                    self._sPlayer),
-                               font_size=20, markup=True)
+                               markup=True)
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
@@ -240,13 +240,13 @@ class PlayerScreen(RelativeLayout):
                 text="[b][color=%s]%s [i](playing %s)%s[/i]"
                 "[/color][/b]" % (sColor, escape_markup(self._sPlayer),
                                   escape_markup(self._sDeck), sOusted),
-                font_size=15, markup=True)
+                markup=True)
         else:
             label = Label(
                 text="[b][color=%s]%s [i](unspecfied)%s"
                 "[/i][/color][/b] " % (sColor, escape_markup(self._sPlayer),
                                        sOusted),
-                font_size=15, markup=True)
+                markup=True)
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
