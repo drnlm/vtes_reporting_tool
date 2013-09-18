@@ -116,16 +116,16 @@ class MinionRow(BoxLayout):
         else:
             sResult = '%s (%s).' % (self._sName, ' & '.join(self.aActions))
         if self.iTorporCount > 1:
-            sResult += ' Was sent to topor / incapicated (%d times)' % (
+            sResult += ' Was sent to Torpor / Incapacitated (%d times)' % (
                 self.iTorporCount)
         elif self.iTorporCount:
-            sResult += ' Was sent to topor / incapicated.'
+            sResult += ' Was sent to Torpor / Incapacitated.'
         if self.bBurnt:
             sResult += ' Was burnt.'
         elif self.bTorpor:
-            sResult += ' in torpor / incapicated'
+            sResult += ' In Torpor / Incapacitated.'
         else:
-            sResult += ' ready'
+            sResult += ' Ready.'
         self.aActions = []
         self.iTorporCount = 0
         return sResult
@@ -248,8 +248,12 @@ class PlayerScreen(RelativeLayout):
         self._update_game()
 
     def get_turn_status(self):
+        if self._sDeck:
+            sInfo = '%s (playing %s)' % (self._sPlayer, self._sDeck)
+        else:
+            sInfo = '%s (playing unknown)' % (self._sPlayer)
         if self._bOusted:
-            return '%s (ousted)' % self._sPlayer
+            return '%s:\n      - ousted' % sInfo
         aMinions = []
         for sMinion, oWidget in self._dMinions.iteritems():
             if oWidget.is_burnt():
@@ -260,9 +264,8 @@ class PlayerScreen(RelativeLayout):
                     self._aBurnt.add(sMinion)
             sActions = oWidget.get_actions()
             aMinions.append('%s - {%s}' % (sMinion, sActions))
-        sMinions = '),  ('.join(aMinions)
-        return '%s: %d pool, minions: (%s)' % (self._sPlayer,
-                                               self.iPool, sMinions)
+        sLog = '%s:\n      - %d pool\n      - minions:' % (sInfo, self.iPool)
+        return '%s\n         - %s' % (sLog, '\n         - '.join(aMinions))
 
     def unhighlight_player(self):
         for label in self.player.children[:]:
