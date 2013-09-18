@@ -21,13 +21,13 @@ GameWidget:
         # Widget subclass, so we fake relative positioning
         size: 0.25 * root.width, 0.05 * root.height
         top: self.height
-        right: 20 + self.width
+        x: 0
         text: "Start"
         on_release: root.start()
     Button:
         size: 0.25 * root.width, 0.05 * root.height
         top: self.height
-        right: root.right - 20
+        right: root.width
         text: "Exit"
         on_release: app.stop()
 
