@@ -66,10 +66,14 @@ class EditBoxRow(BoxLayout):
         super(EditBoxRow, self).__init__()
         self._oParent = oParent
         self.action.text = sAction
-        self.iIndex = iIndex
+        self._iIndex = iIndex
 
     def delete(self):
-        self._oParent.remove_action(self.iIndex)
+        self._oParent.remove_action(self._iIndex)
+
+    def update_index(self, iIndex):
+        if self._iIndex > iIndex:
+            self._iIndex -= 1
 
 
 class EditMinion(Popup):
@@ -99,8 +103,7 @@ class EditMinion(Popup):
         self._aActions.pop(iIndex)
         # Also update references in the widgets
         for oWidget in self._aActionWidgets:
-            if oWidget.iIndex > iIndex:
-                oWidget.iIndex -= 1
+            oWidget.update_index(iIndex)
 
 
 class MinionName(Popup):
