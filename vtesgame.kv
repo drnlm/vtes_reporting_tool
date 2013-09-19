@@ -42,20 +42,25 @@ GameWidget:
         text: ''
         pos_hint: {'x': 0, 'top': 0}
     Button:
-        size_hint: 0.2, 1
-        text: 'Burn / remove'
+        size_hint: 0.15, 1
+        text: 'Burn'
         pos_hint: {'x': 0.4, 'top': 0}
         on_release: root.burn()
     Button:
         id: torpor
-        size_hint: 0.2, 1
+        size_hint: 0.15, 1
         text: 'Topor'
-        pos_hint: {'x': 0.6, 'top': 0}
+        pos_hint: {'x': 0.55, 'top': 0}
         on_release: root.do_torpor()
     Button:
-        size_hint: 0.2, 1
+        size_hint: 0.15, 1
+        text: 'Edit'
+        pos_hint: {'x': 0.7, 'top': 0}
+        on_release: root.edit_minion()
+    Button:
+        size_hint: 0.15, 1
         text: 'Act'
-        pos_hint: {'x': 0.8, 'top': 0}
+        pos_hint: {'x': 0.85, 'top': 0}
         on_release: root.ask_action()
 
 

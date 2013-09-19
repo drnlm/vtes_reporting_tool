@@ -99,6 +99,9 @@ class MinionRow(BoxLayout):
         oPopup = ActionChoice(self)
         oPopup.open()
 
+    def edit_minion(self):
+        pass
+
     def burn(self):
         self.bBurnt = True
         self._oParent._update_game()
@@ -130,7 +133,7 @@ class MinionRow(BoxLayout):
         self.bTorpor = not self.bTorpor
         if self.bTorpor:
             self.iTorporCount += 1
-            self.torpor.text = 'Leave Torpor'
+            self.torpor.text = 'Rescue'
         else:
             self.torpor.text = 'Torpor'
         self._oParent._update_game()
