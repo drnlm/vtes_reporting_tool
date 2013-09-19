@@ -58,6 +58,51 @@ class ActionChoice(Popup):
         self.dismiss()
 
 
+class EditBoxRow(BoxLayout):
+
+    action = ObjectProperty(None)
+
+    def __init__(self, oParent, iIndex, sAction):
+        super(EditBoxRow, self).__init__()
+        self._oParent = oParent
+        self.action.text = sAction
+        self.iIndex = iIndex
+
+    def delete(self):
+        self._oParent.remove_action(self.iIndex)
+
+
+class EditMinion(Popup):
+
+    name = ObjectProperty(None)
+    layout = ObjectProperty(None)
+
+    def __init__(self, oParent, aActions):
+        super(EditMinion, self).__init__()
+        self._oParent = oParent
+        self.name.text = oParent.get_name()
+        self._aActions = aActions
+        self._aActionWidgets = []
+        for iIndex, sAction in enumerate(aActions):
+            oWidget = EditBoxRow(self, iIndex, sAction)
+            self._aActionWidgets.append(oWidget)
+            self.layout.add_widget(oWidget)
+
+    def rename(self):
+        sNewName = self.name.text.strip()
+        if sNewName:
+            self._oParent.rename(sNewName)
+
+    def remove_action(self, iIndex):
+        oWidget = self._aActionWidgets.pop(iIndex)
+        self.layout.remove_widget(oWidget)
+        self._aActions.pop(iIndex)
+        # Also update references in the widgets
+        for oWidget in self._aActionWidgets:
+            if oWidget.iIndex > iIndex:
+                oWidget.iIndex -= 1
+
+
 class MinionName(Popup):
 
     name = ObjectProperty(None)
@@ -99,8 +144,16 @@ class MinionRow(BoxLayout):
         oPopup = ActionChoice(self)
         oPopup.open()
 
+    def get_name(self):
+        return self._sName
+
+    def rename(self, sNewName):
+        self._sName = sNewName
+        self.name.text = sNewName
+
     def edit_minion(self):
-        pass
+        oPopup = EditMinion(self, self.aActions)
+        oPopup.open()
 
     def burn(self):
         self.bBurnt = True
