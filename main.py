@@ -252,6 +252,8 @@ class PlayerScreen(RelativeLayout):
                 oMinion = self._dMinions[sMinion]
                 if oMinion.is_burnt():
                     oMinion = None
+                else:
+                    oMinion.pos_hint = {'x': 0, 'top': y}
             else:
                 oMinion = MinionRow(sMinion, self,
                                     pos_hint={'x': 0, 'top': y},
