@@ -200,8 +200,27 @@ GameWidget:
         Button:
             size_hint: 1, 0.1
             text: 'Bloat down'
-            on_release: root.action('govern')
+            on_release: root.action('bloat down')
         Button:
             size_hint: 1, 0.1
             text: 'Other'
-            on_release: root.action('other')
+            on_release: root.action('other action')
+
+<ActionResult@Popup>:
+    size_hint: .3, .3
+    auto_dismiss: False
+    title: 'Action Result'
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint: 1, 0.1
+            text: 'Successful'
+            on_release: root.resolved('successfully')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Blocked'
+            on_release: root.resolved('was blocked')
+        Button:
+            size_hint: 1, 0.1
+            text: 'Unsucessful'
+            on_release: root.resolved('unsucessfully')

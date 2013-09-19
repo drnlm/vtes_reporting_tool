@@ -30,31 +30,31 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.carousel import Carousel
 
 
+class ActionResult(Popup):
+
+    def __init__(self, oParent):
+        super(ActionResult, self).__init__()
+        self._oParent = oParent
+
+    def resolved(self, sType):
+        self._oParent.add_resolution(sType)
+        self.dismiss()
+
+
 class ActionChoice(Popup):
 
     def __init__(self, oParent):
         super(ActionChoice, self).__init__()
         self._oParent = oParent
+        self._sAction = None
 
     def action(self, sType):
-        if sType == 'bleed':
-            self._oParent.bleed()
-        elif sType == 'vote':
-            self._oParent.vote()
-        elif sType == 'hunt':
-            self._oParent.other()
-        elif sType == 'equip':
-            self._oParent.other()
-        elif sType == 'recruit':
-            self._oParent.other()
-        elif sType == 'rush':
-            self._oParent.other()
-        elif sType == 'bloat':
-            self._oParent.other()
-        elif sType == 'govern':
-            self._oParent.other()
-        elif sType == 'other':
-            self._oParent.other()
+        self._sAction = sType
+        oPopup = ActionResult(self)
+        oPopup.open()
+
+    def add_resolution(self, sResult):
+        self._oParent.add_action(self._sAction, sResult)
         self.dismiss()
 
 
@@ -73,7 +73,6 @@ class MinionName(Popup):
         self.dismiss()
 
     def cancel(self):
-        sName = None
         self.name.focus = False
         self.dismiss()
 
@@ -93,14 +92,8 @@ class MinionRow(BoxLayout):
         self._oParent = oParent
         self.iTorporCount = 0
 
-    def vote(self):
-        self.aActions.append('attempted a vote')
-
-    def bleed(self):
-        self.aActions.append('attempted to bleed')
-
-    def other(self):
-        self.aActions.append('attempted an action')
+    def add_action(self, sAction, sResult):
+        self.aActions.append('attempted to %s (%s)' % (sAction, sResult))
 
     def ask_action(self):
         oPopup = ActionChoice(self)
