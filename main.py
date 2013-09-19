@@ -281,7 +281,7 @@ class PlayerScreen(RelativeLayout):
             sName = 'Master %d' % (len(self.aMasters) + 1)
         sMaster = sName
         iCount = 1
-        while sName in self.aMasters:
+        while sMaster in self.aMasters:
             sMaster = '%s (%d)' % (sName, iCount)
             iCount += 1
         self.aMasters.append(sMaster)
