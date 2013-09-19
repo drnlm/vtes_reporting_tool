@@ -106,6 +106,29 @@ class EditMinion(Popup):
             oWidget.update_index(iIndex)
 
 
+class AddMaster(Popup):
+
+    name = ObjectProperty(None)
+    target = ObjectProperty(None)
+
+    def __init__(self, oParent):
+        super(AddMaster, self).__init__()
+        self._oParent = oParent
+
+    def done(self):
+        sName = self.name.text.strip()
+        sTarget = self.target.text.strip()
+        self.name.focus = False
+        self.target.focus = False
+        self._oParent.add_master(sName, sTarget)
+        self.dismiss()
+
+    def cancel(self):
+        self.name.focus = False
+        self.target.focus = False
+        self.dismiss()
+
+
 class MinionName(Popup):
 
     name = ObjectProperty(None)
@@ -123,6 +146,25 @@ class MinionName(Popup):
     def cancel(self):
         self.name.focus = False
         self.dismiss()
+
+
+class MasterRow(BoxLayout):
+
+    name = ObjectProperty(None)
+    target = ObjectProperty(None)
+
+    def __init__(self, sName, sTarget, oParent, **kwargs):
+        super(MasterRow, self).__init__(**kwargs)
+        self._oParent = oParent
+        self.name.text = sName
+        if sTarget:
+            self.target.text = 'targetting %s' % sTarget
+
+    def remove(self):
+        self._oParent.remove_master(self.name.text)
+
+    def edit(self):
+        self._oParent.edit_master(self.name.text)
 
 
 class MinionRow(BoxLayout):
@@ -213,6 +255,7 @@ class PlayerScreen(RelativeLayout):
         self._aBurnt = set()
         self.unhighlight_player()
         self._dMinions = {}
+        self._dMasters = {}
 
     def ask_minion_name(self):
         oPopup = MinionName(self)
@@ -229,10 +272,32 @@ class PlayerScreen(RelativeLayout):
         self.aMinions.append(sMinion)
         self._update_game()
 
-    def add_master(self):
-        sMaster = 'Master %d' % (len(self.aMasters) + 1)
+    def ask_master_details(self):
+        oPopup = AddMaster(self)
+        oPopup.open()
+
+    def add_master(self, sName, sTarget):
+        if not sName:
+            sName = 'Master %d' % (len(self.aMasters) + 1)
+        sMaster = sName
+        iCount = 1
+        while sName in self.aMasters:
+            sMaster = '%s (%d)' % (sName, iCount)
+            iCount += 1
         self.aMasters.append(sMaster)
+        oWidget = MasterRow(sMaster, sTarget, self,
+                            size_hint=(None, None))
+        self._dMasters[sMaster] = oWidget
         self._update_game()
+
+    def edit_master(self):
+        pass
+
+    def remove_master(self, sMaster):
+        if sMaster in self.aMasters:
+            del self._dMasters[sMaster]
+            self.aMasters.remove(sMaster)
+            self._update_game()
 
     def change_pool(self, iChg):
         self.iPool += iChg
@@ -247,6 +312,12 @@ class PlayerScreen(RelativeLayout):
                       size_hint=(None, None))
         self.game.add_widget(oPool)
         y = 0.95
+        for sMaster in self.aMasters:
+            if sMaster in self._dMasters:
+                oWidget = self._dMasters[sMaster]
+                oWidget.pos_hint = {'x': 0, 'top': y}
+                y -= 0.035
+                self.game.add_widget(oWidget)
         for sMinion in self.aMinions:
             if sMinion in self._dMinions:
                 oMinion = self._dMinions[sMinion]

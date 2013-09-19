@@ -66,11 +66,28 @@ GameWidget:
 
 <MasterRow@BoxLayout>:
     name: name
+    target: target
+    size_hint: 1, 0.03
     Label:
         id: name
-        size: 200, 30
+        size_hint: 0.4, 1
         text: ''
-        pos_hint: {'x': 0, 'top': 0.3}
+        pos_hint: {'x': 0, 'top': 0}
+    Label:
+        id: target
+        size_hint: 0.3, 1
+        text: ''
+        pos_hint: {'x': 0.4, 'top': 0}
+    Button:
+        size_hint: 0.15, 1
+        text: 'Edit'
+        pos_hint: {'x': 0.7, 'top': 0}
+        on_release: root.edit()
+    Button:
+        size_hint: 0.15, 1
+        text: 'Remove'
+        pos_hint: {'x': 0.85, 'top': 0}
+        on_release: root.remove()
 
 
 <PlayerScreen@RelativeLayout>:
@@ -106,7 +123,7 @@ GameWidget:
                 size_hint: 0.25, 0.025
                 pos_hint: {'x': 0, 'top': 0.975}
                 text: "Add Master"
-                on_release: root.add_master()
+                on_release: root.ask_master_details()
             Button:
                 size_hint: 0.25, 0.025
                 pos_hint: {'x': 0.3, 'top': 0.975}
@@ -273,3 +290,41 @@ GameWidget:
             pos_hint: {'x': 0.25, 'top':0.1}
             text: 'Close'
             on_release: root.dismiss()
+
+
+<AddMaster@Popup>:
+    name: name
+    target: target
+    size_hint: .6, .6
+    auto_dismiss: False
+    title: 'Add Master'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint: 1, 0.15
+            Label:
+                text: 'Name:'
+                size_hint: 0.3, 1
+            TextInput:
+                id: name
+                size_hint: 0.7, 1
+        BoxLayout:
+            size_hint: 1, 0.15
+            Label:
+                text: 'Target:'
+                size_hint: 0.3, 1
+            TextInput:
+                id: target
+                size_hint: 0.7, 1
+        BoxLayout:
+            size_hint: 1, 0.1
+            Button:
+                size_hint: 0.5, 1
+                pos_hint: {'top': 1}
+                text: 'Done'
+                on_release: root.done()
+            Button:
+                size_hint: 0.5, 1
+                pos_hint: {'top': 1}
+                text: 'Cancel'
+                on_release: root.cancel()
