@@ -379,6 +379,13 @@ class PlayerScreen(RelativeLayout):
             sInfo = '%s (playing unknown)' % (self._sPlayer)
         if self._bOusted:
             return '%s:\n      - ousted' % sInfo
+        sHeader = '%s:\n      - %d pool' % (sInfo, self.iPool)
+        aMasters = []
+        for sMaster, oWidget in self._dMasters.iteritems():
+            if oWidget.target.text:
+                aMasters.append('%s (%s)' % (sMaster, oWidget.target.text))
+            else:
+                aMasters.append(sMaster)
         aMinions = []
         for sMinion, oWidget in self._dMinions.iteritems():
             if oWidget.is_burnt():
@@ -389,8 +396,17 @@ class PlayerScreen(RelativeLayout):
                     self._aBurnt.add(sMinion)
             sActions = oWidget.get_actions()
             aMinions.append('%s - {%s}' % (sMinion, sActions))
-        sLog = '%s:\n      - %d pool\n      - minions:' % (sInfo, self.iPool)
-        return '%s\n         - %s' % (sLog, '\n         - '.join(aMinions))
+        if aMasters:
+            sMasters = '      - masters:\n         - %s' % (
+                '\n         - '.join(aMasters))
+        else:
+            sMasters = '      - masters:'
+        if aMinions:
+            sMinions = '      - minions:\n         - %s' % (
+                '\n         - '.join(aMinions))
+        else:
+            sMinions = '      - minions:'
+        return '\n'.join([sHeader, sMasters, sMinions])
 
     def unhighlight_player(self):
         for label in self.player.children[:]:
