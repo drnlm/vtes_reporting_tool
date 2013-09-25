@@ -573,6 +573,7 @@ class PlayerSelectWidget(Widget):
 
     input_area = ObjectProperty(None)
     start_button = ObjectProperty(None)
+    load_button = ObjectProperty(None)
 
     def __init__(self, oParent):
         super(PlayerSelectWidget, self).__init__()
@@ -604,10 +605,16 @@ class PlayerSelectWidget(Widget):
     def set_start_mode(self):
         self._sMode = 'Start'
         self.start_button.text = self._sMode
+        if self.load_button not in self.children:
+            self.add_widget(self.load_button)
 
     def set_resume_mode(self):
         self._sMode = 'Resume'
         self.start_button.text = self._sMode
+        self.remove_widget(self.load_button)
+
+    def load(self):
+        pass
 
     def start(self):
         aPlayers = []

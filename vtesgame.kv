@@ -5,6 +5,7 @@ GameWidget:
 <PlayerSelectWidget>:
     input_area: input
     start_button: start
+    load_button: load
     Label:
         top: root.height
         center_x: root.width // 2
@@ -24,6 +25,13 @@ GameWidget:
         x: 0
         text: "Start"
         on_release: root.start()
+    Button:
+        id: load
+        size: 0.25 * root.width, 0.05 * root.height
+        top: self.height
+        x: 0.4 * root.width
+        text: "Load"
+        on_release: root.load()
     Button:
         size: 0.25 * root.width, 0.05 * root.height
         top: self.height
