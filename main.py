@@ -302,7 +302,7 @@ class PlayerScreen(RelativeLayout):
         self._dMasters[sMaster] = oWidget
         self._update_game()
 
-    def edit_master(self):
+    def edit_master(self, sName):
         pass
 
     def remove_master(self, sMaster):
