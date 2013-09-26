@@ -102,6 +102,7 @@ GameWidget:
     game: game
     player: player
     scroll: scroll
+    oust_but: oust_but
     BoxLayout:
         id: player
         size: root.width, 0.1 * root.height
@@ -153,6 +154,7 @@ GameWidget:
         text: "Next Turn"
         on_release: root.next_turn()
     Button:
+        id: oust_but
         size_hint: 0.2, 0.05
         pos_hint: {'x': 0.25}
         text: "Oust Player"

@@ -253,6 +253,7 @@ class PlayerScreen(RelativeLayout):
     game = ObjectProperty(None)
     player = ObjectProperty(None)
     scroll = ObjectProperty(None)
+    oust_but = ObjectProperty(None)
 
     def __init__(self, oParent, sPlayer, sDeck):
         super(PlayerScreen, self).__init__()
@@ -352,11 +353,20 @@ class PlayerScreen(RelativeLayout):
         self.oParent.next_turn()
 
     def oust(self):
-        self.set_ousted()
-        self.oParent.oust()
+        if not self._bOusted:
+            self.set_ousted()
+            self.oParent.oust()
+        else:
+            self.set_unousted()
+            self.oParent.unoust()
 
     def set_ousted(self):
         self._bOusted = True
+        self.oust_but.text = 'UnOust Player'
+
+    def set_unousted(self):
+        self._bOusted = False
+        self.oust_but.text = 'Oust Player'
 
     def set_details(self, sPlayer, sDeck):
         self._sPlayer = sPlayer
@@ -548,6 +558,10 @@ class GameReportWidget(Carousel):
         self.slides[self.index].unhighlight_player()
         if self.index == self.iCur:
             self.next_turn()
+
+    def unoust(self):
+        self.aOusted.remove(self.index)
+        self.update_details()
 
     def set_game_state(self, dOusted, dPool, dMasters, dMinions):
         for index, (slide, sPlayer) in enumerate(zip(self.slides,
