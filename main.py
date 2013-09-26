@@ -362,11 +362,14 @@ class PlayerScreen(RelativeLayout):
 
     def set_ousted(self):
         self._bOusted = True
+        self.remove_widget(self.scroll)
         self.oust_but.text = 'UnOust Player'
 
     def set_unousted(self):
         self._bOusted = False
+        self.add_widget(self.scroll)
         self.oust_but.text = 'Oust Player'
+        self._update_game()
 
     def set_details(self, sPlayer, sDeck):
         self._sPlayer = sPlayer
