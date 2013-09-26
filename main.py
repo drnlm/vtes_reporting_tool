@@ -665,6 +665,14 @@ class PlayerSelectWidget(Widget):
         self.start_button.text = self._sMode
         self.remove_widget(self.load_button)
 
+    def set_info(self, aPlayers, dDecks):
+        for sPlayer, oNameWidget, oDeckWidget in zip(aPlayers,
+                                                     self._aNameWidgets,
+                                                     self._aDeckWidgets):
+            oNameWidget.text = sPlayer
+            if dDecks[sPlayer]:
+                oDeckWidget.text = dDecks[sPlayer]
+
     def ask_file(self):
         oPopup = LoadDialog(self.oParent)
         oPopup.open()
@@ -783,6 +791,7 @@ class GameWidget(BoxLayout):
                     sMinion = sMinion[2:]
                     _, sActions = line.split('{', 1)
                     dMinions[sPlayer].append((sMinion, sActions))
+            self.select.set_info(aPlayers, dDecks)
             self.game.set_players(aPlayers)
             self.game.set_decks(dDecks)
             self.game.add_screens()
