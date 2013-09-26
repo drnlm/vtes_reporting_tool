@@ -689,6 +689,7 @@ class VTESGameApp(App):
     def on_pause(self):
         # Save the current log, in case we don't come back
         self.root.force_save()
+        return True
 
     def build_config(self, config):
         config.setdefaults('vtes_report',
