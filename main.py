@@ -352,8 +352,11 @@ class PlayerScreen(RelativeLayout):
         self.oParent.next_turn()
 
     def oust(self):
-        self._bOusted = True
+        self.set_ousted()
         self.oParent.oust()
+
+    def set_ousted(self):
+        self._bOusted = True
 
     def set_details(self, sPlayer, sDeck):
         self._sPlayer = sPlayer
@@ -546,6 +549,21 @@ class GameReportWidget(Carousel):
         if self.index == self.iCur:
             self.next_turn()
 
+    def set_game_state(self, dOusted, dPool, dMasters, dMinions):
+        for index, (slide, sPlayer) in enumerate(zip(self.slides,
+                                                     self.aPlayers)):
+            if dOusted[sPlayer]:
+                self.aOusted.add(index)
+                slide.iPool = 0
+                slide.set_ousted()
+                continue
+            slide.iPool = dPool[sPlayer]
+            for sMaster, sTarget in dMasters[sPlayer]:
+                slide.add_master(sMaster, sTarget)
+            for sMinion, _ in dMinions[sPlayer]:
+                slide.add_minion(sMinion)
+        self.update_details()
+
     def update_decks(self):
         self.oParent.update_decks()
 
@@ -569,12 +587,18 @@ class GameReportWidget(Carousel):
             return
         sLogFile = "%s_%s.log" % (sLogPrefix,
                                   self._oDate.strftime('%Y-%m-%d_%H:%M'))
+        sBackupLogFile = "%s_%s.old.log" % (sLogPrefix,
+                                            self._oDate.strftime(
+                                                '%Y-%m-%d_%H:%M'))
         sLogFile = os.path.join(sLogPath, sLogFile)
+        sBackupLogFile = os.path.join(sLogPath, sBackupLogFile)
         aLog = []
         for sRound in sorted(self.dLog):
             aLog.append(sRound)
             for sPlayerInfo in self.dLog[sRound]:
                 aLog.append('   %s' % sPlayerInfo)
+        if os.path.exists(sLogFile):
+            os.rename(sLogFile, sBackupLogFile)
         with open(sLogFile, 'w') as f:
             f.write('\n'.join(aLog))
             f.write('\n')
@@ -625,12 +649,8 @@ class PlayerSelectWidget(Widget):
         self.remove_widget(self.load_button)
 
     def ask_file(self):
-        oPopup = LoadDialog(self)
+        oPopup = LoadDialog(self.oParent)
         oPopup.open()
-
-    def load(self, filename):
-        print filename
-        pass
 
     def start(self):
         aPlayers = []
@@ -661,10 +681,10 @@ class GameWidget(BoxLayout):
 
     def start_game(self, aPlayers, dDecks):
         self.game = GameReportWidget(self, self._oApp)
-        self.remove_widget(self.select)
         self.game.set_players(aPlayers)
         self.game.set_decks(dDecks)
         self.game.add_screens()
+        self.remove_widget(self.select)
         self.add_widget(self.game)
 
     def stop_game(self):
@@ -686,6 +706,71 @@ class GameWidget(BoxLayout):
         self.game.set_players(aPlayers)
         self.game.set_decks(dDecks)
         self.game.update_details()
+        self.remove_widget(self.select)
+        self.add_widget(self.game)
+
+    def load(self, filename):
+        self.game = GameReportWidget(self, self._oApp)
+        with open(filename, 'rU') as f:
+            # We need to find the last turn start
+            lines = f.readlines()
+            last_turn = []
+            for l in reversed(lines):
+                if not l.startswith(' '):
+                    last_turn.append(l.strip())
+                    break
+                else:
+                    last_turn.append(l.strip())
+            last_turn.reverse()
+            iRound, iStep = [int(x) for x in last_turn[0].split('.')]
+            self.game.iRound = iRound
+            self.game.iCur = iStep - 1
+            aPlayers = []
+            dDecks = {}
+            dMasters = {}
+            dMinions = {}
+            dPool = {}
+            dOusted = {}
+            sMode = None
+            # Our file format isn't well designed, so this is horrible
+            for line in last_turn[1:]:
+                if not line.startswith('-'):
+                    sPlayer, sDeck = line.split('(playing')
+                    sDeck = sDeck[:-1]  # Drop trailing )
+                    aPlayers.append(sPlayer)
+                    dDecks[sPlayer] = sDeck
+                    dMasters.setdefault(sPlayer, [])
+                    dMinions.setdefault(sPlayer, [])
+                    sMode = None
+                    dOusted[sPlayer] = False
+                elif 'pool' in line:
+                    sPool = line.replace('- ', '').replace(' pool', '')
+                    dPool[sPlayer] = int(sPool)
+                elif line == '- ousted':
+                    dOusted[sPlayer] = True
+                elif line == '- masters:':
+                    sMode = 'Masters'
+                elif line == '- minions:':
+                    sMode = 'Minions'
+                elif sMode == 'Masters' and line.startswith('- '):
+                    if '(targetting' in line:
+                        sMaster, sTarget = line.split('(targetting')
+                        sTarget = sTarget[:-1]
+                        sMaster = sMaster[2:]
+                    else:
+                        sMaster = line[2:]
+                        sTarget = None
+                    dMasters[sPlayer].append((sMaster, sTarget))
+                elif sMode == 'Minions' and line.startswith('- '):
+                    sMinion, _ = line.split(' - {', 1)
+                    sMinion = sMinion[2:]
+                    _, sActions = line.split('{', 1)
+                    dMinions[sPlayer].append((sMinion, sActions))
+            self.game.set_players(aPlayers)
+            self.game.set_decks(dDecks)
+            self.game.add_screens()
+            self.game.set_game_state(dOusted, dPool, dMasters, dMinions)
+
         self.remove_widget(self.select)
         self.add_widget(self.game)
 
