@@ -31,7 +31,7 @@ GameWidget:
         top: self.height
         x: 0.4 * root.width
         text: "Load"
-        on_release: root.load()
+        on_release: root.ask_file()
     Button:
         size: 0.25 * root.width, 0.05 * root.height
         top: self.height
@@ -336,3 +336,22 @@ GameWidget:
                 pos_hint: {'top': 1}
                 text: 'Cancel'
                 on_release: root.cancel()
+
+
+<LoadDialog@Popup>:
+    title: 'Load Exisiting Log'
+    BoxLayout:
+        orientation: 'vertical'
+        FileChooserListView:
+            id: filechooser
+            path: app.config.get('vtes_report', 'logpath')
+            filters: ['*.log']
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.dismiss()
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.selection)

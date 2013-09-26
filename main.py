@@ -30,6 +30,17 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.carousel import Carousel
 
 
+class LoadDialog(Popup):
+
+    def __init__(self, oParent):
+        super(LoadDialog, self).__init__()
+        self._oParent = oParent
+
+    def load(self, filename):
+        self._oParent.load(filename[0])
+        self.dismiss()
+
+
 class ActionResult(Popup):
 
     def __init__(self, oParent):
@@ -613,7 +624,12 @@ class PlayerSelectWidget(Widget):
         self.start_button.text = self._sMode
         self.remove_widget(self.load_button)
 
-    def load(self):
+    def ask_file(self):
+        oPopup = LoadDialog(self)
+        oPopup.open()
+
+    def load(self, filename):
+        print filename
         pass
 
     def start(self):
