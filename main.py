@@ -362,12 +362,16 @@ class PlayerScreen(RelativeLayout):
 
     def set_ousted(self):
         self._bOusted = True
+        # This is ugly, but we need to hang onto a reference to avoid
+        # self.scroll being remove by the gc
+        self._old_scroll = self.scroll._proxy_ref
         self.remove_widget(self.scroll)
         self.oust_but.text = 'UnOust Player'
 
     def set_unousted(self):
         self._bOusted = False
         self.add_widget(self.scroll)
+        self._old_scroll = None
         self.oust_but.text = 'Oust Player'
         self._update_game()
 
