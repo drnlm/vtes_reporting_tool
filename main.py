@@ -164,9 +164,9 @@ class MasterRow(BoxLayout):
     name = ObjectProperty(None)
     target = ObjectProperty(None)
 
-    def __init__(self, sName, sTarget, oParent, **kwargs):
+    def __init__(self, sName, sTarget, oScreen, **kwargs):
         super(MasterRow, self).__init__(**kwargs)
-        self.oParent = oParent
+        self.oScreen = oScreen
         self.name.text = sName
         if sTarget:
             self.target.text = 'targetting %s' % sTarget
@@ -177,14 +177,14 @@ class MinionRow(BoxLayout):
     name = ObjectProperty(None)
     torpor = ObjectProperty(None)
 
-    def __init__(self, sName, oParent, **kwargs):
+    def __init__(self, sName, oScreen, **kwargs):
         super(MinionRow, self).__init__(**kwargs)
         self._sName = sName
         self.name.text = sName
         self.aActions = []
         self.bTorpor = False
         self.bBurnt = False
-        self._oParent = oParent
+        self.oScreen = oScreen
         self.iTorporCount = 0
 
     def add_action(self, sAction, sResult):
@@ -207,7 +207,7 @@ class MinionRow(BoxLayout):
 
     def burn(self):
         self.bBurnt = True
-        self._oParent._update_game()
+        self.oScreen._update_game()
 
     def get_actions(self):
         if not self.aActions:
@@ -239,7 +239,7 @@ class MinionRow(BoxLayout):
             self.torpor.text = 'Rescue'
         else:
             self.torpor.text = 'Torpor'
-        self._oParent._update_game()
+        self.oScreen._update_game()
 
 
 class PlayerScreen(RelativeLayout):
@@ -249,9 +249,9 @@ class PlayerScreen(RelativeLayout):
     scroll = ObjectProperty(None)
     oust_but = ObjectProperty(None)
 
-    def __init__(self, oParent, sPlayer, sDeck):
+    def __init__(self, oGameWidget, sPlayer, sDeck):
         super(PlayerScreen, self).__init__()
-        self.oParent = oParent
+        self.oGameWidget = oGameWidget
         self._sPlayer = sPlayer
         self._sDeck = sDeck
         self._bOusted = False
@@ -354,10 +354,10 @@ class PlayerScreen(RelativeLayout):
     def oust(self):
         if not self._bOusted:
             self.set_ousted()
-            self.oParent.oust()
+            self.oGameWidget.oust()
         else:
             self.set_unousted()
-            self.oParent.unoust()
+            self.oGameWidget.unoust()
 
     def set_ousted(self):
         self._bOusted = True
@@ -457,15 +457,14 @@ class PlayerScreen(RelativeLayout):
 
     def _get_round_label(self):
         label = Label(text="[color=33ff33]Round %d.%d (%d players)[/color]"
-                      % self.oParent.get_round(), markup=True)
+                      % self.oGameWidget.get_round(), markup=True)
         return label
 
 
 class GameReportWidget(Carousel):
 
-    def __init__(self, oParent, oApp):
+    def __init__(self, oApp):
         super(GameReportWidget, self).__init__()
-        self.oParent = oParent
         self.iCur = 0
         self.iScreen = 0
         self.aPlayers = []
@@ -607,13 +606,13 @@ class GameReportWidget(Carousel):
         self.update_details()
 
     def update_decks(self):
-        self.oParent.update_decks()
+        self.parent.update_decks()
 
     def rollback(self):
         pass
 
     def stop_game(self):
-        self.oParent.stop_game()
+        self.parent.stop_game()
         sKey = self.get_round_key()
         aTurn = []
         for oScreen in self.slides:
@@ -655,10 +654,9 @@ class PlayerSelectWidget(Widget):
     start_button = ObjectProperty(None)
     load_button = ObjectProperty(None)
 
-    def __init__(self, oParent):
+    def __init__(self):
         super(PlayerSelectWidget, self).__init__()
         self._sMode = 'Start'
-        self.oParent = oParent
         self._aNameWidgets = []
         self._aDeckWidgets = []
         for i in range(1, 8):
@@ -702,7 +700,7 @@ class PlayerSelectWidget(Widget):
                 oDeckWidget.text = dDecks[sPlayer]
 
     def ask_file(self):
-        oPopup = LoadDialog(self.oParent)
+        oPopup = LoadDialog(self.parent)
         oPopup.open()
 
     def start(self):
@@ -724,7 +722,7 @@ class GameWidget(BoxLayout):
 
     def __init__(self):
         super(GameWidget, self).__init__()
-        self.select = PlayerSelectWidget(self)
+        self.select = PlayerSelectWidget()
         self.game = None
         self._oApp = None
         self.add_widget(self.select)
@@ -733,7 +731,7 @@ class GameWidget(BoxLayout):
         self._oApp = oApp
 
     def start_game(self, aPlayers, dDecks):
-        self.game = GameReportWidget(self, self._oApp)
+        self.game = GameReportWidget(self._oApp)
         self.game.set_players(aPlayers)
         self.game.set_decks(dDecks)
         self.game.add_screens()
@@ -763,7 +761,7 @@ class GameWidget(BoxLayout):
         self.add_widget(self.game)
 
     def load(self, filename):
-        self.game = GameReportWidget(self, self._oApp)
+        self.game = GameReportWidget(self._oApp)
         with open(filename, 'rU') as f:
             # We need to find the last turn start
             lines = f.readlines()
