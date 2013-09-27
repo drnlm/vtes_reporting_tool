@@ -286,6 +286,9 @@ class PlayerScreen(RelativeLayout):
         self.aMinions.append(sMinion)
         self._update_game()
 
+    def get_minion(self, sMinion):
+        return self._dMinions.get(sMinion, None)
+
     def ask_master_details(self):
         if self._bOusted:
             return
@@ -585,8 +588,26 @@ class GameReportWidget(Carousel):
             slide.iPool = dPool[sPlayer]
             for sMaster, sTarget in dMasters[sPlayer]:
                 slide.add_master(sMaster, sTarget)
-            for sMinion, _ in dMinions[sPlayer]:
+            for sMinion, sStatus in dMinions[sPlayer]:
                 slide.add_minion(sMinion)
+                oMinion = slide.get_minion(sMinion)
+                if 'Was burnt.' in sStatus:
+                    oMinion.burn()
+                if 'Was sent to Torpor / Incapacitated' in sStatus:
+                    sTimes = sStatus.split('to Torpor / Incapacitated (')[1]
+                    sTimes = sTimes.split(' times)')[0]
+                    if 'Ready' in sStatus:
+                        iCount = int(sTimes)
+                    else:
+                        # We only do a half cycle here
+                        iCount = int(sTimes) - 1
+                        oMinion.do_torpor()
+                    for cycle in range(iCount):
+                        # bounce minion
+                        oMinion.do_torpor()
+                        oMinion.do_torpor()
+                elif not 'Ready.' in sStatus:
+                    oMinion.do_torpor()
         self.update_details()
 
     def update_decks(self):
@@ -795,10 +816,9 @@ class GameWidget(BoxLayout):
                         sTarget = None
                     dMasters[sPlayer].append((sMaster, sTarget))
                 elif sMode == 'Minions' and line.startswith('- '):
-                    sMinion, _ = line.split(' - {', 1)
+                    sMinion, sStatus = line.split(' - {', 1)
                     sMinion = sMinion[2:]
-                    _, sActions = line.split('{', 1)
-                    dMinions[sPlayer].append((sMinion, sActions))
+                    dMinions[sPlayer].append((sMinion, sStatus))
             self.select.set_info(aPlayers, dDecks)
             self.game.set_players(aPlayers)
             self.game.set_decks(dDecks)
