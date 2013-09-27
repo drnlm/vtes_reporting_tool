@@ -590,7 +590,9 @@ class GameReportWidget(Carousel):
                 elif 'Was sent to Torpor / Incapacitated' in sStatus:
                     oMinion.do_torpor()
                 elif not 'Ready.' in sStatus:
-                    oMinion.bTorpor = True
+                    oMinion.do_torpor()
+                    # Unflag torpor this turn count
+                    self.iTorporCount = 0
                 if '(no actions)' in sStatus:
                     continue
                 # Extract actions from the file
