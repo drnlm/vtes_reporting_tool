@@ -593,7 +593,7 @@ class GameReportWidget(Carousel):
                 oMinion = slide.get_minion(sMinion)
                 if 'Was burnt.' in sStatus:
                     oMinion.burn()
-                if 'Was sent to Torpor / Incapacitated' in sStatus:
+                if 'Was sent to Torpor / Incapacitated (' in sStatus:
                     sTimes = sStatus.split('to Torpor / Incapacitated (')[1]
                     sTimes = sTimes.split(' times)')[0]
                     if 'Ready' in sStatus:
@@ -606,8 +606,10 @@ class GameReportWidget(Carousel):
                         # bounce minion
                         oMinion.do_torpor()
                         oMinion.do_torpor()
-                elif not 'Ready.' in sStatus:
+                elif 'Was sent to Torpor / Incapacitated' in sStatus:
                     oMinion.do_torpor()
+                elif not 'Ready.' in sStatus:
+                    oMinion.bTorpor = True
                 if '(no actions)' in sStatus:
                     continue
                 # Extract actions from the file
