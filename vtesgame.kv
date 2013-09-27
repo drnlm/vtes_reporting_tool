@@ -90,12 +90,12 @@ GameWidget:
         size_hint: 0.15, 1
         text: 'Edit'
         pos_hint: {'x': 0.7, 'top': 0}
-        on_release: root.edit()
+        on_release: root.oParent.edit_master(name.text)
     Button:
         size_hint: 0.15, 1
         text: 'Remove'
         pos_hint: {'x': 0.85, 'top': 0}
-        on_release: root.remove()
+        on_release: root.oParent.remove_master(name.text)
 
 
 <PlayerScreen@RelativeLayout>:
@@ -142,22 +142,22 @@ GameWidget:
         size_hint: 0.25, 0.05
         pos_hint: {'x': 0, 'top': 0.15}
         text: "Prev Player <--"
-        on_release: root.change(-1)
+        on_release: root.oParent.change(-1)
     Button:
         size_hint: 0.25, 0.05
         pos_hint: {'right': 1, 'top': 0.15}
         text: "Next Player -->"
-        on_release: root.change(+1)
+        on_release: root.oParent.change(+1)
     Button:
         size_hint: 0.18, 0.05
         pos_hint: {'x': 0}
         text: "Next Turn"
-        on_release: root.next_turn()
+        on_release: root.oParent.next_turn()
     Button:
         size_hint: 0.18, 0.05
         pos_hint: {'x': 0.2}
         text: 'Rollback'
-        on_release: root.rollback()
+        on_release: root.oParent.rollback()
     Button:
         id: oust_but
         size_hint: 0.18, 0.05
@@ -168,12 +168,12 @@ GameWidget:
         size_hint: 0.18, 0.05
         pos_hint: {'x': 0.61}
         text: "Update Decks"
-        on_release: root.update_decks()
+        on_release: root.oParent.update_decks()
     Button:
         size_hint: 0.18, 0.05
         pos_hint: {'right': 1}
         text: "Stop Game"
-        on_release: root.stop_game()
+        on_release: root.oParent.stop_game()
 
 
 <MinionName@Popup>:

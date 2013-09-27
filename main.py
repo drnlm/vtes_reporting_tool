@@ -166,16 +166,10 @@ class MasterRow(BoxLayout):
 
     def __init__(self, sName, sTarget, oParent, **kwargs):
         super(MasterRow, self).__init__(**kwargs)
-        self._oParent = oParent
+        self.oParent = oParent
         self.name.text = sName
         if sTarget:
             self.target.text = 'targetting %s' % sTarget
-
-    def remove(self):
-        self._oParent.remove_master(self.name.text)
-
-    def edit(self):
-        self._oParent.edit_master(self.name.text)
 
 
 class MinionRow(BoxLayout):
@@ -357,12 +351,6 @@ class PlayerScreen(RelativeLayout):
                 y -= 0.035
                 self.game.add_widget(oMinion)
 
-    def change(self, iDir):
-        self.oParent.change(iDir)
-
-    def next_turn(self):
-        self.oParent.next_turn()
-
     def oust(self):
         if not self._bOusted:
             self.set_ousted()
@@ -370,9 +358,6 @@ class PlayerScreen(RelativeLayout):
         else:
             self.set_unousted()
             self.oParent.unoust()
-
-    def rollback(self):
-        pass
 
     def set_ousted(self):
         self._bOusted = True
@@ -388,12 +373,6 @@ class PlayerScreen(RelativeLayout):
     def set_details(self, sPlayer, sDeck):
         self._sPlayer = sPlayer
         self._sDeck = sDeck
-
-    def update_decks(self):
-        self.oParent.update_decks()
-
-    def stop_game(self):
-        self.oParent.stop_game()
 
     def highlight_player(self):
         for label in self.player.children[:]:
@@ -629,6 +608,9 @@ class GameReportWidget(Carousel):
 
     def update_decks(self):
         self.oParent.update_decks()
+
+    def rollback(self):
+        pass
 
     def stop_game(self):
         self.oParent.stop_game()
