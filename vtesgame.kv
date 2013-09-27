@@ -149,23 +149,28 @@ GameWidget:
         text: "Next Player -->"
         on_release: root.change(+1)
     Button:
-        size_hint: 0.2, 0.05
+        size_hint: 0.18, 0.05
         pos_hint: {'x': 0}
         text: "Next Turn"
         on_release: root.next_turn()
     Button:
+        size_hint: 0.18, 0.05
+        pos_hint: {'x': 0.2}
+        text: 'Rollback'
+        on_release: root.rollback()
+    Button:
         id: oust_but
-        size_hint: 0.2, 0.05
-        pos_hint: {'x': 0.25}
+        size_hint: 0.18, 0.05
+        pos_hint: {'x': 0.41}
         text: "Oust Player"
         on_release: root.oust()
     Button:
-        size_hint: 0.2, 0.05
-        pos_hint: {'x': 0.55}
+        size_hint: 0.18, 0.05
+        pos_hint: {'x': 0.61}
         text: "Update Decks"
         on_release: root.update_decks()
     Button:
-        size_hint: 0.2, 0.05
+        size_hint: 0.18, 0.05
         pos_hint: {'right': 1}
         text: "Stop Game"
         on_release: root.stop_game()

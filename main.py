@@ -371,6 +371,9 @@ class PlayerScreen(RelativeLayout):
             self.set_unousted()
             self.oParent.unoust()
 
+    def rollback(self):
+        pass
+
     def set_ousted(self):
         self._bOusted = True
         # This is ugly, but we need to hang onto a reference to avoid
