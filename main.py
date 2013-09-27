@@ -270,6 +270,8 @@ class PlayerScreen(RelativeLayout):
         self._dMasters = {}
 
     def ask_minion_name(self):
+        if self._bOusted:
+            return
         oPopup = MinionName(self)
         oPopup.open()
 
@@ -285,6 +287,8 @@ class PlayerScreen(RelativeLayout):
         self._update_game()
 
     def ask_master_details(self):
+        if self._bOusted:
+            return
         oPopup = AddMaster(self)
         oPopup.open()
 
@@ -312,6 +316,8 @@ class PlayerScreen(RelativeLayout):
             self._update_game()
 
     def change_pool(self, iChg):
+        if self._bOusted:
+            return
         self.iPool += iChg
         self._update_game()
 
@@ -319,6 +325,8 @@ class PlayerScreen(RelativeLayout):
         for widget in self.game.children[:]:
             if not isinstance(widget, Button):
                 self.game.remove_widget(widget)
+            elif self._bOusted:
+                widget.background_color = [0.5, 0.25, 0.25, 1]
         oPool = Label(text="[color=ff0022]%d[/color]" % self.iPool,
                       markup=True, pos_hint={'right': 1, 'top': 0.98},
                       size_hint=(None, 0.02))
@@ -364,14 +372,10 @@ class PlayerScreen(RelativeLayout):
         self._bOusted = True
         # This is ugly, but we need to hang onto a reference to avoid
         # self.scroll being remove by the gc
-        self._old_scroll = self.scroll._proxy_ref
-        self.remove_widget(self.scroll)
         self.oust_but.text = 'UnOust Player'
 
     def set_unousted(self):
         self._bOusted = False
-        self.add_widget(self.scroll)
-        self._old_scroll = None
         self.oust_but.text = 'Oust Player'
         self._update_game()
 
