@@ -608,6 +608,18 @@ class GameReportWidget(Carousel):
                         oMinion.do_torpor()
                 elif not 'Ready.' in sStatus:
                     oMinion.do_torpor()
+                if '(no actions)' in sStatus:
+                    continue
+                # Extract actions from the file
+                for sCand in sStatus.split('attempted to')[1:]:
+                    sAction, sRes = sCand.split('(', 1)
+                    if 'unsucessfully' in sRes:
+                        sRes = 'unsucessfully'
+                    elif 'successfully' in sRes:
+                        sRes = 'successfully'
+                    elif 'was blocked' in sRes:
+                        sRes = 'was blocked'
+                    oMinion.add_action(sAction.strip(), sRes)
         self.update_details()
 
     def update_decks(self):
