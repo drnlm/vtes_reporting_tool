@@ -765,7 +765,6 @@ class GameWidget(BoxLayout):
         self.add_widget(self.game)
 
     def load(self, filename):
-        self.game = GameReportWidget(self._oApp)
         with open(filename, 'rU') as f:
             # We need to find the last turn start
             lines = f.readlines()
@@ -777,54 +776,58 @@ class GameWidget(BoxLayout):
                 else:
                     last_turn.append(l.strip())
             last_turn.reverse()
-            iRound, iStep = [int(x) for x in last_turn[0].split('.')]
-            self.game.iRound = iRound
-            self.game.iCur = iStep - 1
-            aPlayers = []
-            dDecks = {}
-            dMasters = {}
-            dMinions = {}
-            dPool = {}
-            dOusted = {}
-            sMode = None
-            # Our file format isn't well designed, so this is horrible
-            for line in last_turn[1:]:
-                if not line.startswith('-'):
-                    sPlayer, sDeck = line.split('(playing')
-                    sDeck = sDeck[:-1]  # Drop trailing )
-                    aPlayers.append(sPlayer)
-                    dDecks[sPlayer] = sDeck
-                    dMasters.setdefault(sPlayer, [])
-                    dMinions.setdefault(sPlayer, [])
-                    sMode = None
-                    dOusted[sPlayer] = False
-                elif 'pool' in line:
-                    sPool = line.replace('- ', '').replace(' pool', '')
-                    dPool[sPlayer] = int(sPool)
-                elif line == '- ousted':
-                    dOusted[sPlayer] = True
-                elif line == '- masters:':
-                    sMode = 'Masters'
-                elif line == '- minions:':
-                    sMode = 'Minions'
-                elif sMode == 'Masters' and line.startswith('- '):
-                    if '(targetting' in line:
-                        sMaster, sTarget = line.split('(targetting')
-                        sTarget = sTarget[:-1]
-                        sMaster = sMaster[2:]
-                    else:
-                        sMaster = line[2:]
-                        sTarget = None
-                    dMasters[sPlayer].append((sMaster, sTarget))
-                elif sMode == 'Minions' and line.startswith('- '):
-                    sMinion, sStatus = line.split(' - {', 1)
-                    sMinion = sMinion[2:]
-                    dMinions[sPlayer].append((sMinion, sStatus))
-            self.select.set_info(aPlayers, dDecks)
-            self.game.set_players(aPlayers)
-            self.game.set_decks(dDecks)
-            self.game.add_screens()
-            self.game.set_game_state(dOusted, dPool, dMasters, dMinions)
+        self.load_turn(last_turn)
+
+    def load_turn(self, turn_data):
+        self.game = GameReportWidget(self._oApp)
+        iRound, iStep = [int(x) for x in turn_data[0].split('.')]
+        self.game.iRound = iRound
+        self.game.iCur = iStep - 1
+        aPlayers = []
+        dDecks = {}
+        dMasters = {}
+        dMinions = {}
+        dPool = {}
+        dOusted = {}
+        sMode = None
+        # Our file format isn't well designed, so this is horrible
+        for line in turn_data[1:]:
+            if not line.startswith('-'):
+                sPlayer, sDeck = line.split('(playing')
+                sDeck = sDeck[:-1]  # Drop trailing )
+                aPlayers.append(sPlayer)
+                dDecks[sPlayer] = sDeck
+                dMasters.setdefault(sPlayer, [])
+                dMinions.setdefault(sPlayer, [])
+                sMode = None
+                dOusted[sPlayer] = False
+            elif 'pool' in line:
+                sPool = line.replace('- ', '').replace(' pool', '')
+                dPool[sPlayer] = int(sPool)
+            elif line == '- ousted':
+                dOusted[sPlayer] = True
+            elif line == '- masters:':
+                sMode = 'Masters'
+            elif line == '- minions:':
+                sMode = 'Minions'
+            elif sMode == 'Masters' and line.startswith('- '):
+                if '(targetting' in line:
+                    sMaster, sTarget = line.split('(targetting')
+                    sTarget = sTarget[:-1]
+                    sMaster = sMaster[2:]
+                else:
+                    sMaster = line[2:]
+                    sTarget = None
+                dMasters[sPlayer].append((sMaster, sTarget))
+            elif sMode == 'Minions' and line.startswith('- '):
+                sMinion, sStatus = line.split(' - {', 1)
+                sMinion = sMinion[2:]
+                dMinions[sPlayer].append((sMinion, sStatus))
+        self.select.set_info(aPlayers, dDecks)
+        self.game.set_players(aPlayers)
+        self.game.set_decks(dDecks)
+        self.game.add_screens()
+        self.game.set_game_state(dOusted, dPool, dMasters, dMinions)
 
         self.remove_widget(self.select)
         self.add_widget(self.game)
