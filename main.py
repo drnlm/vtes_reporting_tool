@@ -237,8 +237,10 @@ class MinionRow(BoxLayout):
         if self.bTorpor:
             self.iTorporCount += 1
             self.torpor.text = 'Rescue'
+            self.name.color = [0.75, 0.15, 0.15, 1]
         else:
             self.torpor.text = 'Torpor'
+            self.name.color = [1, 1, 1, 1]
         self.oScreen._update_game()
 
 
