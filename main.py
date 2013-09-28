@@ -28,6 +28,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.carousel import Carousel
+from kivy.adapters.listadapter import ListAdapter
+from kivy.uix.listview import ListItemButton
 
 
 class LoadDialog(Popup):
@@ -38,6 +40,38 @@ class LoadDialog(Popup):
 
     def load(self, filename):
         self._oParent.load(filename[0])
+        self.dismiss()
+
+
+class RollbackDialog(Popup):
+
+    def __init__(self, oMainWidget, iRound, iNum, iCur):
+        self.aData = ['%s.%s' % (x + 1, y + 1)
+                      for x in range(iRound) for y in range(iNum)
+                      if x < iRound - 1 or y < iCur + 1]
+        self.turnadapt = ListAdapter(data=self.aData,
+                                     args_converter=self.convert,
+                                     cls=ListItemButton,
+                                     selection_mode='single',
+                                     allow_empty_selection=False)
+        self.turnadapt.bind(selection=self.selection)
+        self.oMainWidget = oMainWidget
+        self.sRound = '%s.%s' % (iRound, iCur + 1)
+        super(RollbackDialog, self).__init__()
+
+    def convert(self, iRow, sText):
+        return {'text': sText,
+                'size_hint_y': None, 'height': 25}
+
+    def selection(self, oAdapt, *args):
+        if self.turnadapt.selection:
+            # We need this guard, since we're called twice on selection
+            # changes - once with nothing selected and once with the
+            # new selection
+            self.sRound = self.turnadapt.selection[0].text
+
+    def select(self):
+        self.oMainWidget.rollback_to_round(self.sRound)
         self.dismiss()
 
 
@@ -570,9 +604,12 @@ class GameReportWidget(Carousel):
                 continue
             slide.iPool = dPool[sPlayer]
             for sMaster, sTarget in dMasters[sPlayer]:
-                slide.add_master(sMaster, sTarget)
+                # FIXME: Check for master removal
+                if sMaster not in slide.aMasters:
+                    slide.add_master(sMaster, sTarget)
             for sMinion, sStatus in dMinions[sPlayer]:
-                slide.add_minion(sMinion)
+                if sMinion not in slide.aMinions:
+                    slide.add_minion(sMinion)
                 oMinion = slide.get_minion(sMinion)
                 if 'Was burnt.' in sStatus:
                     oMinion.burn()
@@ -612,9 +649,6 @@ class GameReportWidget(Carousel):
     def update_decks(self):
         self.parent.update_decks()
 
-    def rollback(self):
-        pass
-
     def stop_game(self):
         self.parent.stop_game()
         sKey = self.get_round_key()
@@ -624,15 +658,21 @@ class GameReportWidget(Carousel):
         self.dLog[sKey] = aTurn
         self.save_log()
 
-    def save_log(self):
-        """Save the log"""
+    def get_log_for_turn(self, sRound):
+        aLog = []
+        aLog.append(sRound)
+        for sPlayerInfo in self.dLog[sRound]:
+            aLog.append('   %s' % sPlayerInfo)
+        return '\n'.join(aLog)
+
+    def get_log_file_name(self):
         sLogPath = self._oApp.config.get('vtes_report', 'logpath')
         sLogPrefix = self._oApp.config.get('vtes_report', 'logprefix')
         if not os.path.exists(sLogPath):
             os.makedirs(sLogPath)
         if not os.path.isdir(sLogPath):
             # FIXME: error popups and so forth
-            return
+            return None, None
         sLogFile = "%s_%s.log" % (sLogPrefix,
                                   self._oDate.strftime('%Y-%m-%d_%H:%M'))
         sBackupLogFile = "%s_%s.old.log" % (sLogPrefix,
@@ -640,6 +680,13 @@ class GameReportWidget(Carousel):
                                                 '%Y-%m-%d_%H:%M'))
         sLogFile = os.path.join(sLogPath, sLogFile)
         sBackupLogFile = os.path.join(sLogPath, sBackupLogFile)
+        return sLogFile, sBackupLogFile
+
+    def save_log(self):
+        """Save the log"""
+        sLogFile, sBackupLogFile = self.get_log_file_name()
+        if not sLogFile:
+            return
         aLog = []
         for sRound in sorted(self.dLog):
             aLog.append(sRound)
@@ -764,23 +811,53 @@ class GameWidget(BoxLayout):
         self.remove_widget(self.select)
         self.add_widget(self.game)
 
-    def load(self, filename):
+    def load_log(self, filename):
+        dTurns = {}
+        sTurn = None
+        aTurn = []
         with open(filename, 'rU') as f:
             # We need to find the last turn start
-            lines = f.readlines()
-            last_turn = []
-            for l in reversed(lines):
-                if not l.startswith(' '):
-                    last_turn.append(l.strip())
-                    break
+            for line in f.readlines():
+                if not line.startswith(' '):
+                    if sTurn:
+                        dTurns[sTurn] = aTurn
+                        aTurn = []
+                    sTurn = line.strip()
                 else:
-                    last_turn.append(l.strip())
-            last_turn.reverse()
-        self.load_turn(last_turn)
+                    aTurn.append(line.strip())
+        if sTurn not in dTurns:
+            dTurns[sTurn] = aTurn
+        return dTurns, sTurn
 
-    def load_turn(self, turn_data):
+    def load(self, filename):
+        dTurns, sTurn = self.load_log(filename)
+        self.load_game(dTurns, sTurn)
+
+    def load_game(self, dTurns, sRound):
         self.game = GameReportWidget(self._oApp)
-        iRound, iStep = [int(x) for x in turn_data[0].split('.')]
+        for sTurn in sorted(dTurns):
+            if sTurn <= sRound:
+                self.load_turn(sTurn, dTurns[sTurn])
+                if sTurn != sRound:
+                    self.game.next_turn()
+        self.remove_widget(self.select)
+        self.add_widget(self.game)
+
+    def rollback(self):
+        oPopup = RollbackDialog(self, self.game.iRound,
+                                len(self.game.aPlayers),
+                                self.game.iCur)
+        oPopup.open()
+
+    def rollback_to_round(self, sRound):
+        self.game.save_log()
+        sLogFile, _ = self.game.get_log_file_name()
+        dTurns, _ = self.load_log(sLogFile)
+        self.remove_widget(self.game)
+        self.load_game(dTurns, sRound)
+
+    def load_turn(self, sTurn, turn_data):
+        iRound, iStep = [int(x) for x in sTurn.split('.')]
         self.game.iRound = iRound
         self.game.iCur = iStep - 1
         aPlayers = []
@@ -791,7 +868,7 @@ class GameWidget(BoxLayout):
         dOusted = {}
         sMode = None
         # Our file format isn't well designed, so this is horrible
-        for line in turn_data[1:]:
+        for line in turn_data:
             if not line.startswith('-'):
                 sPlayer, sDeck = line.split('(playing')
                 sDeck = sDeck[:-1]  # Drop trailing )
@@ -823,14 +900,12 @@ class GameWidget(BoxLayout):
                 sMinion, sStatus = line.split(' - {', 1)
                 sMinion = sMinion[2:]
                 dMinions[sPlayer].append((sMinion, sStatus))
-        self.select.set_info(aPlayers, dDecks)
-        self.game.set_players(aPlayers)
+        if not self.game.aPlayers:
+            self.select.set_info(aPlayers, dDecks)
+            self.game.set_players(aPlayers)
+            self.game.add_screens()
         self.game.set_decks(dDecks)
-        self.game.add_screens()
         self.game.set_game_state(dOusted, dPool, dMasters, dMinions)
-
-        self.remove_widget(self.select)
-        self.add_widget(self.game)
 
 
 class VTESGameApp(App):
