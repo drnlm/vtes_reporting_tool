@@ -239,8 +239,9 @@ class MinionRow(BoxLayout):
         return self._sName
 
     def rename(self, sNewName):
-        self._sName = sNewName
-        self.name.text = sNewName
+        sName = self.oScreen.update_minion(self._sName, sNewName)
+        self._sName = sName
+        self.name.text = sName
 
     def edit_minion(self):
         oPopup = EditMinion(self, self.aActions)
@@ -320,14 +321,18 @@ class PlayerScreen(RelativeLayout):
             iCount += 1
         return sMaster
 
-    def add_minion(self, sMinion):
-        if not sMinion:
-            sMinion = 'Minion %d' % (len(self.aMinions) + 1)
+    def _get_unique_minion_name(self, sName):
         iCount = 2
-        sOrig = sMinion
+        sMinion = sName
         while sMinion in self._dMinions:
-            sMinion = '%s %d' % (sOrig, iCount)
+            sMinion = '%s (%d)' % (sName, iCount)
             iCount += 1
+        return sMinion
+
+    def add_minion(self, sName):
+        if not sName:
+            sName = 'Minion %d' % (len(self.aMinions) + 1)
+        sMinion = self._get_unique_minion_name(sName)
         self.aMinions.append(sMinion)
         self._update_game()
 
@@ -357,6 +362,18 @@ class PlayerScreen(RelativeLayout):
         sTarget = oWidget.target.text.replace('targetting ', '', 1)
         oPopup = AddMaster(self, False, sName, sTarget)
         oPopup.open()
+
+    def update_minion(self, sOldName, sNewName):
+        if sNewName != sOldName:
+            sName = self._get_unique_minion_name(sNewName)
+            oWidget = self._dMinions[sOldName]
+            iIndex = self.aMinions.index(sOldName)
+            self.aMinions[iIndex] = sName
+            del self._dMinions[sOldName]
+            self._dMinions[sName] = oWidget
+        else:
+            sName = sOldName
+        return sName
 
     def update_master(self, sOldName, sNewName, sNewTarget):
         oWidget = self._dMasters[sOldName]
