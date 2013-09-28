@@ -360,6 +360,9 @@ class PlayerScreen(RelativeLayout):
                 self.game.remove_widget(widget)
             elif self._bOusted:
                 widget.background_color = [0.5, 0.25, 0.25, 1]
+        # Ousted players don't show any info about their ready region
+        if self._bOusted:
+            return
         oPool = Label(text="[color=ff0022]%d[/color]" % self.iPool,
                       markup=True, pos_hint={'right': 1, 'top': 0.98},
                       size_hint=(None, 0.02))
