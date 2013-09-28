@@ -585,7 +585,7 @@ class GameReportWidget(Carousel):
             self.slides[self.iCur].highlight_player()
         self.dLog[sKey] = aTurn
         # We set things up so we can animate a scroll to the current player
-        if self.index != self.iCur:
+        if self.index != self.iCur and self.parent:
             if self.iCur > 0:
                 self.index = self.iCur - 1
             else:
