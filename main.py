@@ -849,6 +849,7 @@ class GameWidget(BoxLayout):
                 if sTurn != sRound:
                     self.game.next_turn()
         self.remove_widget(self.select)
+        self.game.index = self.game.iCur
         self.add_widget(self.game)
 
     def rollback(self):
