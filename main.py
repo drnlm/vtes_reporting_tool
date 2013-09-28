@@ -154,16 +154,25 @@ class AddMaster(Popup):
     name = ObjectProperty(None)
     target = ObjectProperty(None)
 
-    def __init__(self, oParent):
+    def __init__(self, oParent, bAdd, sOldName='', sOldTarget=''):
         super(AddMaster, self).__init__()
         self._oParent = oParent
+        self._bAdd = bAdd
+        self._sOldName = sOldName
+        if sOldName:
+            self.name.text = sOldName
+        if sOldTarget:
+            self.target.text = sOldTarget
 
     def done(self):
         sName = self.name.text.strip()
         sTarget = self.target.text.strip()
         self.name.focus = False
         self.target.focus = False
-        self._oParent.add_master(sName, sTarget)
+        if self._bAdd:
+            self._oParent.add_master(sName, sTarget)
+        else:
+            self._oParent.update_master(self._sOldName, sName, sTarget)
         self.dismiss()
 
     def cancel(self):
@@ -303,6 +312,14 @@ class PlayerScreen(RelativeLayout):
         oPopup = MinionName(self)
         oPopup.open()
 
+    def _get_unique_master_name(self, sName):
+        sMaster = sName
+        iCount = 1
+        while sMaster in self.aMasters:
+            sMaster = '%s (%d)' % (sName, iCount)
+            iCount += 1
+        return sMaster
+
     def add_minion(self, sMinion):
         if not sMinion:
             sMinion = 'Minion %d' % (len(self.aMinions) + 1)
@@ -320,17 +337,13 @@ class PlayerScreen(RelativeLayout):
     def ask_master_details(self):
         if self._bOusted:
             return
-        oPopup = AddMaster(self)
+        oPopup = AddMaster(self, True)
         oPopup.open()
 
     def add_master(self, sName, sTarget):
         if not sName:
             sName = 'Master %d' % (len(self.aMasters) + 1)
-        sMaster = sName
-        iCount = 1
-        while sMaster in self.aMasters:
-            sMaster = '%s (%d)' % (sName, iCount)
-            iCount += 1
+        sMaster = self._get_unique_master_name(sName)
         self.aMasters.append(sMaster)
         oWidget = MasterRow(sMaster, sTarget, self,
                             size_hint=(None, None))
@@ -338,7 +351,26 @@ class PlayerScreen(RelativeLayout):
         self._update_game()
 
     def edit_master(self, sName):
-        pass
+        if self._bOusted or sName not in self._dMasters:
+            return
+        oWidget = self._dMasters[sName]
+        sTarget = oWidget.target.text.replace('targetting ', '', 1)
+        oPopup = AddMaster(self, False, sName, sTarget)
+        oPopup.open()
+
+    def update_master(self, sOldName, sNewName, sNewTarget):
+        oWidget = self._dMasters[sOldName]
+        if sNewName != sOldName:
+            del self._dMasters[sOldName]
+            iIndex = self.aMasters.index(sOldName)
+            sMaster = self._get_unique_master_name(sNewName)
+            self._dMasters[sMaster] = oWidget
+            self.aMasters[iIndex] = sMaster
+            oWidget.name.text = sMaster
+        if sNewTarget:
+            oWidget.target.text = 'targetting %s' % sNewTarget
+        else:
+            oWidget.target.text = ''
 
     def remove_master(self, sMaster):
         if sMaster in self.aMasters:
