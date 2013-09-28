@@ -39,8 +39,9 @@ class LoadDialog(Popup):
         self._oParent = oParent
 
     def load(self, filename):
-        self._oParent.load(filename[0])
-        self.dismiss()
+        if filename:
+            self._oParent.load(filename[0])
+            self.dismiss()
 
 
 class RollbackDialog(Popup):
