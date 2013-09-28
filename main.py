@@ -45,18 +45,15 @@ class LoadDialog(Popup):
 
 class RollbackDialog(Popup):
 
-    def __init__(self, oMainWidget, iRound, iNum, iCur):
-        self.aData = ['%s.%s' % (x + 1, y + 1)
-                      for x in range(iRound) for y in range(iNum)
-                      if x < iRound - 1 or y < iCur + 1]
-        self.turnadapt = ListAdapter(data=self.aData,
+    def __init__(self, oMainWidget, aRounds):
+        self.turnadapt = ListAdapter(data=aRounds,
                                      args_converter=self.convert,
                                      cls=ListItemButton,
                                      selection_mode='single',
                                      allow_empty_selection=False)
         self.turnadapt.bind(selection=self.selection)
         self.oMainWidget = oMainWidget
-        self.sRound = '%s.%s' % (iRound, iCur + 1)
+        self.sRound = aRounds[0]
         super(RollbackDialog, self).__init__()
 
     def convert(self, iRow, sText):
@@ -563,6 +560,13 @@ class GameReportWidget(Carousel):
     def get_round_key(self):
         return '%d.%d' % (self.iRound, self.iCur + 1)
 
+    def get_rounds_list(self):
+        aList = sorted(self.dLog)
+        sCurRound = self.get_round_key()
+        if sCurRound not in self.dLog:
+            aList.append(sCurRound)
+        return aList
+
     def next_turn(self):
         # Log the current turn and advance the turn
         sKey = self.get_round_key()
@@ -847,9 +851,7 @@ class GameWidget(BoxLayout):
         self.add_widget(self.game)
 
     def rollback(self):
-        oPopup = RollbackDialog(self, self.game.iRound,
-                                len(self.game.aPlayers),
-                                self.game.iCur)
+        oPopup = RollbackDialog(self, self.game.get_rounds_list())
         oPopup.open()
 
     def rollback_to_round(self, sRound):
