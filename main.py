@@ -212,6 +212,17 @@ class MasterRow(BoxLayout):
         if sTarget:
             self.target.text = 'targetting %s' % sTarget
 
+    def get_target(self):
+        if 'targetting' in self.target.text:
+            return self.target.text.replace('targetting ', '', 1)
+        return ''
+
+    def set_target(self, sTarget):
+        if sTarget:
+            self.target.text = 'targetting %s' % sTarget
+        else:
+            self.target.text = ''
+
 
 class MinionRow(BoxLayout):
 
@@ -339,6 +350,9 @@ class PlayerScreen(RelativeLayout):
     def get_minion(self, sMinion):
         return self._dMinions.get(sMinion, None)
 
+    def get_master(self, sMaster):
+        return self._dMasters.get(sMaster, None)
+
     def ask_master_details(self):
         if self._bOusted:
             return
@@ -359,7 +373,7 @@ class PlayerScreen(RelativeLayout):
         if self._bOusted or sName not in self._dMasters:
             return
         oWidget = self._dMasters[sName]
-        sTarget = oWidget.target.text.replace('targetting ', '', 1)
+        sTarget = oWidget.get_target()
         oPopup = AddMaster(self, False, sName, sTarget)
         oPopup.open()
 
@@ -385,9 +399,9 @@ class PlayerScreen(RelativeLayout):
             self.aMasters[iIndex] = sMaster
             oWidget.name.text = sMaster
         if sNewTarget:
-            oWidget.target.text = 'targetting %s' % sNewTarget
+            oWidget.set_target(sNewTarget)
         else:
-            oWidget.target.text = ''
+            oWidget.set_target('')
 
     def remove_master(self, sMaster):
         if sMaster in self.aMasters:
@@ -660,10 +674,18 @@ class GameReportWidget(Carousel):
                 slide.set_ousted()
                 continue
             slide.iPool = dPool[sPlayer]
+            aSeenMasters = set()
             for sMaster, sTarget in dMasters[sPlayer]:
                 # FIXME: Check for master removal
+                aSeenMasters.add(sMaster)
                 if sMaster not in slide.aMasters:
                     slide.add_master(sMaster, sTarget)
+                else:
+                    oMaster = slide.get_master(sMaster)
+                    oMaster.set_target(sTarget)
+            for sCurMaster in slide.aMasters[:]:
+                if sCurMaster not in aSeenMasters:
+                    slide.remove_master(sCurMaster)
             for sMinion, sStatus in dMinions[sPlayer]:
                 if sMinion not in slide.aMinions:
                     slide.add_minion(sMinion)
