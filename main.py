@@ -5,6 +5,9 @@
 
 """A simple tool for helping track VTES games on android phones"""
 
+
+__version__ = '0.0.1'
+
 import os
 import datetime
 import kivy
