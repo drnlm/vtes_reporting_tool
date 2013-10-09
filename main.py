@@ -21,6 +21,7 @@ kivy.require('1.7.0')
 
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.utils import escape_markup
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
@@ -317,9 +318,18 @@ class PlayerScreen(RelativeLayout):
         self.aMinions = []
         self.aMasters = []
         self._aBurnt = set()
+        self._oTimeLabel = Label(text='', markup=True)
+        self._update_time_label(0)
         self.unhighlight_player()
         self._dMinions = {}
         self._dMasters = {}
+        # We schedule this faster than the actual clock update
+        # to reduce sampling issues
+        Clock.schedule_interval(self._update_time_label, 0.5)
+
+    def stop(self):
+        """Cleanup"""
+        Clock.unschedule(self._update_time_label)
 
     def ask_minion_name(self):
         if self._bOusted:
@@ -493,6 +503,7 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
+        self.player.add_widget(self._oTimeLabel)
         self._update_game()
 
     def get_turn_status(self):
@@ -555,6 +566,7 @@ class PlayerScreen(RelativeLayout):
         self.player.add_widget(label)
         label = self._get_round_label()
         self.player.add_widget(label)
+        self.player.add_widget(self._oTimeLabel)
         self.scroll.scroll_y = 1
         self._update_game()
 
@@ -562,6 +574,11 @@ class PlayerScreen(RelativeLayout):
         label = Label(text="[color=33ff33]Round %d.%d (%d players)[/color]"
                       % self.oGameWidget.get_round(), markup=True)
         return label
+
+    def _update_time_label(self, dt):
+        time_text = "[color=33ff33]Time: {:d}:{:02d}:{:02d}[/color]".format(
+            *self.oGameWidget.get_time())
+        self._oTimeLabel.text = time_text
 
 
 class GameReportWidget(Carousel):
@@ -578,6 +595,11 @@ class GameReportWidget(Carousel):
         self.loop = True
         self._oApp = oApp
         self._oDate = datetime.datetime.utcnow()
+        self._fTime = 0
+
+    def start(self):
+        """Start timers, etc."""
+        Clock.schedule_interval(self._update_time, 1)
 
     def set_players(self, aPlayers):
         self.aPlayers = aPlayers
@@ -624,6 +646,18 @@ class GameReportWidget(Carousel):
     def get_round(self):
         return self.iRound, self.iCur + 1, len(self.aPlayers)
 
+    def get_time(self):
+        iTime = int(self._fTime + 0.5)
+        iHours, iMinutes = iTime // 3600, iTime % 3600
+        iMinutes, iSeconds = iMinutes // 60, iMinutes % 60
+        return iHours, iMinutes, iSeconds
+
+    def set_time(self, iHours, iMinutes, iSeconds):
+        self._fTime = iHours * 3600.0 + iMinutes * 60.0 + iSeconds
+
+    def _update_time(self, dt):
+        self._fTime += dt
+
     def get_round_key(self):
         return '%d.%d' % (self.iRound, self.iCur + 1)
 
@@ -643,7 +677,8 @@ class GameReportWidget(Carousel):
         else:
             while self.iCur in self.aOusted:
                 self.step_current()
-        aTurn = []
+        sTime = "%d:%02d:%02d" % self.get_time()
+        aTurn = ['- elapsed time: %s' % sTime]
         for oScreen in self.slides:
             oScreen.unhighlight_player()
             aTurn.append(oScreen.get_turn_status())
@@ -732,11 +767,14 @@ class GameReportWidget(Carousel):
         self.parent.update_decks()
 
     def stop_game(self):
+        Clock.unschedule(self._update_time)
         self.parent.stop_game()
         sKey = self.get_round_key()
-        aTurn = []
+        sTime = "%d:%02d:%02d" % self.get_time()
+        aTurn = ['- elapsed time: %s' % sTime]
         for oScreen in self.slides:
             aTurn.append(oScreen.get_turn_status())
+            oScreen.stop()
         self.dLog[sKey] = aTurn
         self.save_log()
 
@@ -870,6 +908,7 @@ class GameWidget(BoxLayout):
         self.game.add_screens()
         self.remove_widget(self.select)
         self.add_widget(self.game)
+        self.game.start()
 
     def stop_game(self):
         self.remove_widget(self.game)
@@ -914,6 +953,7 @@ class GameWidget(BoxLayout):
     def load(self, filename):
         dTurns, sTurn = self.load_log(filename)
         self.load_game(dTurns, sTurn)
+        self.game.start()
 
     def load_game(self, dTurns, sRound):
         self.game = GameReportWidget(self._oApp)
@@ -950,7 +990,11 @@ class GameWidget(BoxLayout):
         sMode = None
         # Our file format isn't well designed, so this is horrible
         for line in turn_data:
-            if not line.startswith('-'):
+            if line.startswith('- elapsed time'):
+                # Extract the time and set it correctly
+                _, sTime = line.split('- elapsed time:', 1)
+                self.game.set_time(*[int(x) for x in sTime.split(':', 2)])
+            elif not line.startswith('-'):
                 sPlayer, sDeck = line.split('(playing')
                 sDeck = sDeck[:-1]  # Drop trailing )
                 aPlayers.append(sPlayer)
