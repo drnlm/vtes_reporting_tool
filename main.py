@@ -305,6 +305,7 @@ class PlayerScreen(RelativeLayout):
 
     game = ObjectProperty(None)
     player = ObjectProperty(None)
+    turn_info = ObjectProperty(None)
     scroll = ObjectProperty(None)
     oust_but = ObjectProperty(None)
 
@@ -487,9 +488,19 @@ class PlayerScreen(RelativeLayout):
         self._sPlayer = sPlayer
         self._sDeck = sDeck
 
-    def highlight_player(self):
+    def _remove_player_info(self):
         for label in self.player.children[:]:
             self.player.remove_widget(label)
+        for label in self.turn_info.children[:]:
+            self.turn_info.remove_widget(label)
+
+    def _add_turn_info(self):
+        label = self._get_round_label()
+        self.turn_info.add_widget(label)
+        self.turn_info.add_widget(self._oTimeLabel)
+
+    def highlight_player(self):
+        self._remove_player_info()
         if self._sDeck:
             label = Label(text="[b][color=00ffff]%s [i](playing %s)[/i]"
                           "[/color][/b]" % (escape_markup(self._sPlayer),
@@ -501,9 +512,7 @@ class PlayerScreen(RelativeLayout):
                                    self._sPlayer),
                                markup=True)
         self.player.add_widget(label)
-        label = self._get_round_label()
-        self.player.add_widget(label)
-        self.player.add_widget(self._oTimeLabel)
+        self._add_turn_info()
         self._update_game()
 
     def get_turn_status(self):
@@ -543,8 +552,7 @@ class PlayerScreen(RelativeLayout):
         return '\n'.join([sHeader, sMasters, sMinions])
 
     def unhighlight_player(self):
-        for label in self.player.children[:]:
-            self.player.remove_widget(label)
+        self._remove_player_info()
         if not self._bOusted:
             sColor = 'aaaaaa'
             sOusted = ''
@@ -564,9 +572,7 @@ class PlayerScreen(RelativeLayout):
                                        sOusted),
                 markup=True)
         self.player.add_widget(label)
-        label = self._get_round_label()
-        self.player.add_widget(label)
-        self.player.add_widget(self._oTimeLabel)
+        self._add_turn_info()
         self.scroll.scroll_y = 1
         self._update_game()
 

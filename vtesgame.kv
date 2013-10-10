@@ -101,13 +101,20 @@ GameWidget:
 <PlayerScreen@RelativeLayout>:
     game: game
     player: player
+    turn_info: turn_info
     scroll: scroll
     oust_but: oust_but
     BoxLayout:
-        id: player
+        orientation: 'vertical'
         size: root.width, 0.1 * root.height
         size_hint: None, None
         pos_hint: {'top': 1}
+        BoxLayout:
+            id: turn_info
+            size_hint: 1, 0.5
+        BoxLayout:
+            id: player
+            size_hint: 1, 0.5
     ScrollView:
         id: scroll
         size: root.width, 0.75 * root.height
