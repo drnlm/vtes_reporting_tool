@@ -755,6 +755,9 @@ class GameReportWidget(Carousel):
                     oMinion.do_torpor()
                     # Unflag torpor this turn count
                     self.iTorporCount = 0
+                elif oMinion.bTorpor and 'Ready.' in sStatus:
+                    # Rescue minion
+                    oMinion.do_torpor()
                 if '(no actions)' in sStatus:
                     continue
                 # Extract actions from the file
