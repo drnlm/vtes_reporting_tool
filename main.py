@@ -659,7 +659,7 @@ class GameReportWidget(Carousel):
         self._fTime += dt
 
     def get_round_key(self):
-        return '%d.%d' % (self.iRound, self.iCur + 1)
+        return '%02d.%d' % (self.iRound, self.iCur + 1)
 
     def get_rounds_list(self):
         aList = sorted(self.dLog)
