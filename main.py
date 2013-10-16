@@ -691,6 +691,8 @@ class GameReportWidget(Carousel):
         if self.iCur not in self.aOusted:
             self.slides[self.iCur].highlight_player()
         self.dLog[sKey] = aTurn
+        # Save a temporary log of state at the start of the turn
+        self.save_log(True)
         # We set things up so we can animate a scroll to the current player
         if self.index != self.iCur and self.parent:
             if self.iCur > 0:
@@ -811,18 +813,21 @@ class GameReportWidget(Carousel):
         sBackupLogFile = os.path.join(sLogPath, sBackupLogFile)
         return sLogFile, sBackupLogFile
 
-    def save_log(self):
+    def save_log(self, bTemp=False):
         """Save the log"""
         sLogFile, sBackupLogFile = self.get_log_file_name()
         if not sLogFile:
             return
+        if bTemp:
+            sLogFile = sLogFile.replace('.log', '.temp.log')
         aLog = []
         for sRound in sorted(self.dLog):
             aLog.append(sRound)
             for sPlayerInfo in self.dLog[sRound]:
                 aLog.append('   %s' % sPlayerInfo)
-        if os.path.exists(sLogFile):
-            os.rename(sLogFile, sBackupLogFile)
+        if not bTemp:
+            if os.path.exists(sLogFile):
+                os.rename(sLogFile, sBackupLogFile)
         with open(sLogFile, 'w') as f:
             f.write('\n'.join(aLog))
             f.write('\n')
